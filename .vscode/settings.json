@@ -1,0 +1,5 @@
+{
+  "git.inputValidation": "warn",
+  "git.inputValidationLength": 72,
+  "git.inputValidationSubjectLength": 50
+}

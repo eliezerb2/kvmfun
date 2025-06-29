@@ -1,0 +1,17 @@
+{
+  "feat": {
+    "prefix": "feat",
+    "body": "feat($1): $2",
+    "description": "Feature commit"
+  },
+  "fix": {
+    "prefix": "fix", 
+    "body": "fix($1): $2",
+    "description": "Bug fix commit"
+  },
+  "docs": {
+    "prefix": "docs",
+    "body": "docs: $1", 
+    "description": "Documentation commit"
+  }
+}
