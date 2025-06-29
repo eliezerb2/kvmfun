@@ -70,9 +70,9 @@ def list_vm_disks(dom: libvirt.virDomain) -> List[Dict[str, Any]]:
     root = parse_domain_xml(dom, live=True)
     disks = []
     
-    for disk in root.findall(".//disk[@type='file']"):
-        target = disk.find("target")
-        source = disk.find("source")
+    for disk in root.findall(".//lib:disk[@type='file']", NAMESPACES):
+        target = disk.find("lib:target", NAMESPACES)
+        source = disk.find("lib:source", NAMESPACES)
         if target is not None and source is not None:
             disk_info = {
                 "target_dev": target.get("dev"),

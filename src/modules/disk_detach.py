@@ -8,6 +8,9 @@ from src.modules.libvirt_utils import get_libvirt_connection, parse_domain_xml
 
 logger = logging.getLogger(__name__)
 
+# Define XML namespaces used in libvirt domain XML
+NAMESPACES = {'lib': 'http://libvirt.org/schemas/domain/qemu/1.0'}
+
 def get_disk_xml_for_target_dev(dom: libvirt.virDomain, target_dev: str) -> str:
     """
     Extract XML description of specific disk from VM's domain XML.
@@ -35,8 +38,8 @@ def get_disk_xml_for_target_dev(dom: libvirt.virDomain, target_dev: str) -> str:
     try:
         root = parse_domain_xml(dom, live=False)
         
-        for disk_elem in root.findall(".//disk"):
-            target_elem = disk_elem.find("target")
+        for disk_elem in root.findall(".//lib:disk", NAMESPACES):
+            target_elem = disk_elem.find("lib:target", NAMESPACES)
             if target_elem is not None and target_elem.get("dev") == target_dev:
                 logger.debug(f"Found matching disk element for device '{target_dev}'")
                 
