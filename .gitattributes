@@ -1,0 +1,19 @@
+# Docker files use LF
+Dockerfile text eol=lf
+*.dockerfile text eol=lf
+
+# Helm files use LF
+helm/**/*.yaml text eol=lf
+helm/**/*.yml text eol=lf
+helm/**/*.tpl text eol=lf
+
+# Python files use LF
+*.py text eol=lf
+
+# Windows scripts use CRLF
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Default to LF for other text files
+* text=auto eol=lf

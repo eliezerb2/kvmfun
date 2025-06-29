@@ -1,0 +1,49 @@
+# Number of pod replicas
+replicaCount: 1
+
+# Docker image configuration
+image:
+  repository: kvmfun
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+# Kubernetes service configuration
+service:
+  type: ClusterIP
+  port: 80           # External port
+  targetPort: 8000   # Container port
+  # Service annotations for ingress or service mesh
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # service.beta.kubernetes.io/aws-load-balancer-type: nlb
+
+# Ingress configuration (disabled by default)
+ingress:
+  enabled: false
+
+# Resource limits and requests
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+# Node selection constraints
+nodeSelector: {}
+
+# Pod tolerations
+tolerations: []
+
+# Pod affinity rules
+affinity: {}
+
+# Environment variables for the application
+env:
+  - name: DEBUG
+    value: "false"
+  - name: HOST
+    value: "0.0.0.0"
+  - name: PORT
+    value: "8000"
