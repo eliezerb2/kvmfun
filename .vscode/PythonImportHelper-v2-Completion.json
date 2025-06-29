@@ -1,5 +1,53 @@
 [
     {
+        "label": "APIRouter",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "HTTPException",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "status",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "FastAPI",
+        "importPath": "fastapi",
+        "description": "fastapi",
+        "isExtraImport": true,
+        "detail": "fastapi",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "Field",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
         "label": "libvirt",
         "kind": 6,
         "isExtraImport": true,
@@ -9,12 +57,92 @@
         "documentation": {}
     },
     {
-        "label": "sys",
+        "label": "logging",
         "kind": 6,
         "isExtraImport": true,
-        "importPath": "sys",
-        "description": "sys",
-        "detail": "sys",
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "get_libvirt_domain",
+        "importPath": "src.modules.disk_attach",
+        "description": "src.modules.disk_attach",
+        "isExtraImport": true,
+        "detail": "src.modules.disk_attach",
+        "documentation": {}
+    },
+    {
+        "label": "get_next_available_virtio_dev",
+        "importPath": "src.modules.disk_attach",
+        "description": "src.modules.disk_attach",
+        "isExtraImport": true,
+        "detail": "src.modules.disk_attach",
+        "documentation": {}
+    },
+    {
+        "label": "attach_qcow2_disk",
+        "importPath": "src.modules.disk_attach",
+        "description": "src.modules.disk_attach",
+        "isExtraImport": true,
+        "detail": "src.modules.disk_attach",
+        "documentation": {}
+    },
+    {
+        "label": "_letters_to_int",
+        "importPath": "src.modules.disk_attach",
+        "description": "src.modules.disk_attach",
+        "isExtraImport": true,
+        "detail": "src.modules.disk_attach",
+        "documentation": {}
+    },
+    {
+        "label": "_int_to_letters",
+        "importPath": "src.modules.disk_attach",
+        "description": "src.modules.disk_attach",
+        "isExtraImport": true,
+        "detail": "src.modules.disk_attach",
+        "documentation": {}
+    },
+    {
+        "label": "get_next_available_virtio_dev",
+        "importPath": "src.modules.disk_attach",
+        "description": "src.modules.disk_attach",
+        "isExtraImport": true,
+        "detail": "src.modules.disk_attach",
+        "documentation": {}
+    },
+    {
+        "label": "detach_disk",
+        "importPath": "src.modules.disk_detach",
+        "description": "src.modules.disk_detach",
+        "isExtraImport": true,
+        "detail": "src.modules.disk_detach",
+        "documentation": {}
+    },
+    {
+        "label": "get_disk_xml_for_target_dev",
+        "importPath": "src.modules.disk_detach",
+        "description": "src.modules.disk_detach",
+        "isExtraImport": true,
+        "detail": "src.modules.disk_detach",
+        "documentation": {}
+    },
+    {
+        "label": "poll_for_disk_removal",
+        "importPath": "src.modules.disk_detach",
+        "description": "src.modules.disk_detach",
+        "isExtraImport": true,
+        "detail": "src.modules.disk_detach",
+        "documentation": {}
+    },
+    {
+        "label": "detach_disk",
+        "importPath": "src.modules.disk_detach",
+        "description": "src.modules.disk_detach",
+        "isExtraImport": true,
+        "detail": "src.modules.disk_detach",
         "documentation": {}
     },
     {
@@ -54,21 +182,36 @@
         "documentation": {}
     },
     {
-        "label": "logging",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "logging",
-        "description": "logging",
-        "detail": "logging",
-        "documentation": {}
-    },
-    {
         "label": "time",
         "kind": 6,
         "isExtraImport": true,
         "importPath": "time",
         "description": "time",
         "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
         "documentation": {}
     },
     {
@@ -81,78 +224,6 @@
         "documentation": {}
     },
     {
-        "label": "APIRouter",
-        "importPath": "fastapi",
-        "description": "fastapi",
-        "isExtraImport": true,
-        "detail": "fastapi",
-        "documentation": {}
-    },
-    {
-        "label": "HTTPException",
-        "importPath": "fastapi",
-        "description": "fastapi",
-        "isExtraImport": true,
-        "detail": "fastapi",
-        "documentation": {}
-    },
-    {
-        "label": "FastAPI",
-        "importPath": "fastapi",
-        "description": "fastapi",
-        "isExtraImport": true,
-        "detail": "fastapi",
-        "documentation": {}
-    },
-    {
-        "label": "BaseModel",
-        "importPath": "pydantic",
-        "description": "pydantic",
-        "isExtraImport": true,
-        "detail": "pydantic",
-        "documentation": {}
-    },
-    {
-        "label": "get_libvirt_domain",
-        "importPath": "src.modules.disk_attach",
-        "description": "src.modules.disk_attach",
-        "isExtraImport": true,
-        "detail": "src.modules.disk_attach",
-        "documentation": {}
-    },
-    {
-        "label": "get_next_available_virtio_dev",
-        "importPath": "src.modules.disk_attach",
-        "description": "src.modules.disk_attach",
-        "isExtraImport": true,
-        "detail": "src.modules.disk_attach",
-        "documentation": {}
-    },
-    {
-        "label": "attach_qcow2_disk",
-        "importPath": "src.modules.disk_attach",
-        "description": "src.modules.disk_attach",
-        "isExtraImport": true,
-        "detail": "src.modules.disk_attach",
-        "documentation": {}
-    },
-    {
-        "label": "detach_disk",
-        "importPath": "src.modules.disk_detach",
-        "description": "src.modules.disk_detach",
-        "isExtraImport": true,
-        "detail": "src.modules.disk_detach",
-        "documentation": {}
-    },
-    {
-        "label": "Tuple",
-        "importPath": "typing",
-        "description": "typing",
-        "isExtraImport": true,
-        "detail": "typing",
-        "documentation": {}
-    },
-    {
         "label": "disk_routes",
         "importPath": "src.api",
         "description": "src.api",
@@ -161,183 +232,76 @@
         "documentation": {}
     },
     {
-        "label": "get_libvirt_domain",
-        "kind": 2,
-        "importPath": "backup.attach_disk",
-        "description": "backup.attach_disk",
-        "peekOfCode": "def get_libvirt_domain(vm_name: str) -> tuple[libvirt.virConnect, libvirt.virDomain]:\n    \"\"\"\n    Establishes a libvirt connection and looks up a domain by name.\n    :param vm_name: The name of the virtual machine.\n    :type vm_name: str\n    :returns: A tuple containing the libvirt connection object and the domain object.\n    :rtype: tuple[libvirt.virConnect, libvirt.virDomain]\n    :raises RuntimeError: If connection fails or domain is not found.\n    \"\"\"\n    conn = None",
-        "detail": "backup.attach_disk",
+        "label": "pytest",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pytest",
+        "description": "pytest",
+        "detail": "pytest",
         "documentation": {}
     },
     {
-        "label": "get_next_available_virtio_dev",
-        "kind": 2,
-        "importPath": "backup.attach_disk",
-        "description": "backup.attach_disk",
-        "peekOfCode": "def get_next_available_virtio_dev(dom: libvirt.virDomain) -> str:\n    \"\"\"\n    Finds the next available VirtIO block device target (e.g., 'vda', 'vdb', 'vdc', 'vdaa', etc.)\n    for a given VM by inspecting its current XML configuration.\n    It tracks ALL existing 'dev' names regardless of bus type and assigns an unused\n    virtio-style name that does not conflict with any existing 'dev' name.\n    :param dom: The libvirt Domain object for the VM.\n    :type dom: libvirt.virDomain\n    :returns: The next available VirtIO device name.\n    :rtype: str",
-        "detail": "backup.attach_disk",
+        "label": "TestClient",
+        "importPath": "fastapi.testclient",
+        "description": "fastapi.testclient",
+        "isExtraImport": true,
+        "detail": "fastapi.testclient",
         "documentation": {}
     },
     {
-        "label": "attach_qcow2_disk",
-        "kind": 2,
-        "importPath": "backup.attach_disk",
-        "description": "backup.attach_disk",
-        "peekOfCode": "def attach_qcow2_disk(dom: libvirt.virDomain, qcow2_path: str, target_dev: str) -> bool:\n    \"\"\"\n    Attaches a QCOW2 disk to a running KVM/QEMU VM using libvirt-python.\n    Confirms the disk was added after attachment.\n    If the disk with the specified path and target device is already attached,\n    it logs a warning and skips re-attachment.\n    :param dom: The libvirt Domain object for the VM.\n    :type dom: libvirt.virDomain\n    :param qcow2_path: The full path to the QCOW2 disk image file on the host.\n    :type qcow2_path: str",
-        "detail": "backup.attach_disk",
+        "label": "patch",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
         "documentation": {}
     },
     {
-        "label": "QCOW2_DEFAULT_SIZE",
-        "kind": 5,
-        "importPath": "backup.attach_disk",
-        "description": "backup.attach_disk",
-        "peekOfCode": "QCOW2_DEFAULT_SIZE = \"1G\"\nLIBVIRT_DOMAIN_NAMESPACE = \"http://libvirt.org/schemas/domain/1.0\"\nNAMESPACES = {'lib': LIBVIRT_DOMAIN_NAMESPACE}\nVIRTIO_DISK_PREFIX = \"vd\"\n# --- End Constants ---\n# Helper functions\ndef _letters_to_int(s: str) -> int:\n    \"\"\"\n    Converts a letter sequence (e.g., 'a', 'aa') to a 0-indexed integer.\n    :param s: The letter sequence (e.g., 'a', 'b', 'aa').",
-        "detail": "backup.attach_disk",
+        "label": "Mock",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
         "documentation": {}
     },
     {
-        "label": "LIBVIRT_DOMAIN_NAMESPACE",
-        "kind": 5,
-        "importPath": "backup.attach_disk",
-        "description": "backup.attach_disk",
-        "peekOfCode": "LIBVIRT_DOMAIN_NAMESPACE = \"http://libvirt.org/schemas/domain/1.0\"\nNAMESPACES = {'lib': LIBVIRT_DOMAIN_NAMESPACE}\nVIRTIO_DISK_PREFIX = \"vd\"\n# --- End Constants ---\n# Helper functions\ndef _letters_to_int(s: str) -> int:\n    \"\"\"\n    Converts a letter sequence (e.g., 'a', 'aa') to a 0-indexed integer.\n    :param s: The letter sequence (e.g., 'a', 'b', 'aa').\n    :type s: str",
-        "detail": "backup.attach_disk",
+        "label": "Mock",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
         "documentation": {}
     },
     {
-        "label": "NAMESPACES",
-        "kind": 5,
-        "importPath": "backup.attach_disk",
-        "description": "backup.attach_disk",
-        "peekOfCode": "NAMESPACES = {'lib': LIBVIRT_DOMAIN_NAMESPACE}\nVIRTIO_DISK_PREFIX = \"vd\"\n# --- End Constants ---\n# Helper functions\ndef _letters_to_int(s: str) -> int:\n    \"\"\"\n    Converts a letter sequence (e.g., 'a', 'aa') to a 0-indexed integer.\n    :param s: The letter sequence (e.g., 'a', 'b', 'aa').\n    :type s: str\n    :returns: The 0-indexed integer representation.",
-        "detail": "backup.attach_disk",
+        "label": "patch",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
         "documentation": {}
     },
     {
-        "label": "VIRTIO_DISK_PREFIX",
-        "kind": 5,
-        "importPath": "backup.attach_disk",
-        "description": "backup.attach_disk",
-        "peekOfCode": "VIRTIO_DISK_PREFIX = \"vd\"\n# --- End Constants ---\n# Helper functions\ndef _letters_to_int(s: str) -> int:\n    \"\"\"\n    Converts a letter sequence (e.g., 'a', 'aa') to a 0-indexed integer.\n    :param s: The letter sequence (e.g., 'a', 'b', 'aa').\n    :type s: str\n    :returns: The 0-indexed integer representation.\n    :rtype: int",
-        "detail": "backup.attach_disk",
+        "label": "Mock",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
         "documentation": {}
     },
     {
-        "label": "confirm_guest_disk_unmounted",
-        "kind": 2,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "def confirm_guest_disk_unmounted(dom: libvirt.virDomain, target_dev: str, vm_disk_path: str):\n    \"\"\"\n    Attempts to confirm that the disk is unmounted in the guest OS using QEMU Guest Agent.\n    NOTE: Requires QEMU Guest Agent to be installed and running in the VM.\n    This is a *best effort* check. If QGA isn't working or the disk is raw, it might not confirm.\n    Args:\n        dom: The libvirt domain object.\n        target_dev: The libvirt target device name (e.g., 'vdb').\n        vm_disk_path: A path or identifier for the disk within the guest OS (e.g., '/dev/vdb1' or a mount point).\n                      This is highly guest-OS dependent and may need refinement.",
-        "detail": "backup.dettach_disk",
+        "label": "patch",
+        "importPath": "unittest.mock",
+        "description": "unittest.mock",
+        "isExtraImport": true,
+        "detail": "unittest.mock",
         "documentation": {}
     },
     {
-        "label": "detach_disk",
-        "kind": 2,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "def detach_disk(conn: libvirt.virConnect, vm_name: str, target_dev: str):\n    \"\"\"\n    Detaches a disk from a running VM, persisting the change to config.\n    Includes validation and polling.\n    \"\"\"\n    dom = conn.lookupByName(vm_name)\n    if dom is None:\n        raise ValueError(f'VM \"{vm_name}\" not found.')\n    # 1. Get the disk XML\n    disk_xml_to_detach = _get_disk_xml_for_target_dev(dom, target_dev)",
-        "detail": "backup.dettach_disk",
-        "documentation": {}
-    },
-    {
-        "label": "update_snapshot_metadata",
-        "kind": 2,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "def update_snapshot_metadata(\n    conn: libvirt.virConnect,\n    vm_name: str,\n    snapshot_name: str,\n    custom_namespace_prefix: str,\n    custom_namespace_uri: str,\n    custom_tag_local_name: str,\n    new_custom_tag_value: str\n):\n    \"\"\"",
-        "detail": "backup.dettach_disk",
-        "documentation": {}
-    },
-    {
-        "label": "main_operation",
-        "kind": 2,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "def main_operation(\n    vm_name: str,\n    target_dev: str,\n    snapshot_name: str,\n    custom_namespace_prefix: str,\n    custom_namespace_uri: str,\n    custom_tag_local_name: str,\n    new_custom_tag_value: str,\n    guest_disk_path_for_qga: str = None # Optional: e.g., '/mnt/data' or '/dev/vdb1'\n):",
-        "detail": "backup.dettach_disk",
-        "documentation": {}
-    },
-    {
-        "label": "logger",
-        "kind": 5,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "logger = logging.getLogger(__name__)\n# --- Helper Functions ---\ndef _get_disk_xml_for_target_dev(dom: libvirt.virDomain, target_dev: str) -> str:\n    \"\"\"\n    Extracts the XML description of a specific disk from a VM's domain XML.\n    \"\"\"\n    current_dom_xml = dom.XMLDesc(0) # Get persistent XML\n    root = ET.fromstring(current_dom_xml)\n    disk_to_detach_xml = None\n    for disk_elem in root.findall(\".//disk\"):",
-        "detail": "backup.dettach_disk",
-        "documentation": {}
-    },
-    {
-        "label": "VM_NAME",
-        "kind": 5,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "VM_NAME = \"Fedora39\" # <<--- REPLACE with your VM name\nTARGET_DEVICE_NAME = \"vdb\"  # <<--- REPLACE with the target dev of the disk to detach\nSNAPSHOT_NAME = \"f39_data_snap_archived_20250629\" # <<--- REPLACE with the libvirt name of your external snapshot\n# Your custom namespace details\nCUSTOM_NAMESPACE_PREFIX = \"mycustom\"\nCUSTOM_NAMESPACE_URI = \"http://yourcompany.com/libvirt/snapshot/customdata/1.0\"\nCUSTOM_TAG_LOCAL_NAME = \"archive_status\" # The tag name WITHOUT the prefix\nNEW_CUSTOM_TAG_VALUE = \"detached_for_long_term_archive_20250629\"\n# Optional: Path to the disk/mount point in the guest OS for QGA check\n# IMPORTANT: This needs to be accurate for your guest!",
-        "detail": "backup.dettach_disk",
-        "documentation": {}
-    },
-    {
-        "label": "TARGET_DEVICE_NAME",
-        "kind": 5,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "TARGET_DEVICE_NAME = \"vdb\"  # <<--- REPLACE with the target dev of the disk to detach\nSNAPSHOT_NAME = \"f39_data_snap_archived_20250629\" # <<--- REPLACE with the libvirt name of your external snapshot\n# Your custom namespace details\nCUSTOM_NAMESPACE_PREFIX = \"mycustom\"\nCUSTOM_NAMESPACE_URI = \"http://yourcompany.com/libvirt/snapshot/customdata/1.0\"\nCUSTOM_TAG_LOCAL_NAME = \"archive_status\" # The tag name WITHOUT the prefix\nNEW_CUSTOM_TAG_VALUE = \"detached_for_long_term_archive_20250629\"\n# Optional: Path to the disk/mount point in the guest OS for QGA check\n# IMPORTANT: This needs to be accurate for your guest!\nGUEST_DISK_PATH_FOR_QGA = \"/mnt/mydata\" # <<--- REPLACE if you use QGA and have a specific path",
-        "detail": "backup.dettach_disk",
-        "documentation": {}
-    },
-    {
-        "label": "SNAPSHOT_NAME",
-        "kind": 5,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "SNAPSHOT_NAME = \"f39_data_snap_archived_20250629\" # <<--- REPLACE with the libvirt name of your external snapshot\n# Your custom namespace details\nCUSTOM_NAMESPACE_PREFIX = \"mycustom\"\nCUSTOM_NAMESPACE_URI = \"http://yourcompany.com/libvirt/snapshot/customdata/1.0\"\nCUSTOM_TAG_LOCAL_NAME = \"archive_status\" # The tag name WITHOUT the prefix\nNEW_CUSTOM_TAG_VALUE = \"detached_for_long_term_archive_20250629\"\n# Optional: Path to the disk/mount point in the guest OS for QGA check\n# IMPORTANT: This needs to be accurate for your guest!\nGUEST_DISK_PATH_FOR_QGA = \"/mnt/mydata\" # <<--- REPLACE if you use QGA and have a specific path\n# --- Execute ---",
-        "detail": "backup.dettach_disk",
-        "documentation": {}
-    },
-    {
-        "label": "CUSTOM_NAMESPACE_PREFIX",
-        "kind": 5,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "CUSTOM_NAMESPACE_PREFIX = \"mycustom\"\nCUSTOM_NAMESPACE_URI = \"http://yourcompany.com/libvirt/snapshot/customdata/1.0\"\nCUSTOM_TAG_LOCAL_NAME = \"archive_status\" # The tag name WITHOUT the prefix\nNEW_CUSTOM_TAG_VALUE = \"detached_for_long_term_archive_20250629\"\n# Optional: Path to the disk/mount point in the guest OS for QGA check\n# IMPORTANT: This needs to be accurate for your guest!\nGUEST_DISK_PATH_FOR_QGA = \"/mnt/mydata\" # <<--- REPLACE if you use QGA and have a specific path\n# --- Execute ---\nif __name__ == \"__main__\":\n    main_operation(",
-        "detail": "backup.dettach_disk",
-        "documentation": {}
-    },
-    {
-        "label": "CUSTOM_NAMESPACE_URI",
-        "kind": 5,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "CUSTOM_NAMESPACE_URI = \"http://yourcompany.com/libvirt/snapshot/customdata/1.0\"\nCUSTOM_TAG_LOCAL_NAME = \"archive_status\" # The tag name WITHOUT the prefix\nNEW_CUSTOM_TAG_VALUE = \"detached_for_long_term_archive_20250629\"\n# Optional: Path to the disk/mount point in the guest OS for QGA check\n# IMPORTANT: This needs to be accurate for your guest!\nGUEST_DISK_PATH_FOR_QGA = \"/mnt/mydata\" # <<--- REPLACE if you use QGA and have a specific path\n# --- Execute ---\nif __name__ == \"__main__\":\n    main_operation(\n        VM_NAME,",
-        "detail": "backup.dettach_disk",
-        "documentation": {}
-    },
-    {
-        "label": "CUSTOM_TAG_LOCAL_NAME",
-        "kind": 5,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "CUSTOM_TAG_LOCAL_NAME = \"archive_status\" # The tag name WITHOUT the prefix\nNEW_CUSTOM_TAG_VALUE = \"detached_for_long_term_archive_20250629\"\n# Optional: Path to the disk/mount point in the guest OS for QGA check\n# IMPORTANT: This needs to be accurate for your guest!\nGUEST_DISK_PATH_FOR_QGA = \"/mnt/mydata\" # <<--- REPLACE if you use QGA and have a specific path\n# --- Execute ---\nif __name__ == \"__main__\":\n    main_operation(\n        VM_NAME,\n        TARGET_DEVICE_NAME,",
-        "detail": "backup.dettach_disk",
-        "documentation": {}
-    },
-    {
-        "label": "NEW_CUSTOM_TAG_VALUE",
-        "kind": 5,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "NEW_CUSTOM_TAG_VALUE = \"detached_for_long_term_archive_20250629\"\n# Optional: Path to the disk/mount point in the guest OS for QGA check\n# IMPORTANT: This needs to be accurate for your guest!\nGUEST_DISK_PATH_FOR_QGA = \"/mnt/mydata\" # <<--- REPLACE if you use QGA and have a specific path\n# --- Execute ---\nif __name__ == \"__main__\":\n    main_operation(\n        VM_NAME,\n        TARGET_DEVICE_NAME,\n        SNAPSHOT_NAME,",
-        "detail": "backup.dettach_disk",
-        "documentation": {}
-    },
-    {
-        "label": "GUEST_DISK_PATH_FOR_QGA",
-        "kind": 5,
-        "importPath": "backup.dettach_disk",
-        "description": "backup.dettach_disk",
-        "peekOfCode": "GUEST_DISK_PATH_FOR_QGA = \"/mnt/mydata\" # <<--- REPLACE if you use QGA and have a specific path\n# --- Execute ---\nif __name__ == \"__main__\":\n    main_operation(\n        VM_NAME,\n        TARGET_DEVICE_NAME,\n        SNAPSHOT_NAME,\n        CUSTOM_NAMESPACE_PREFIX,\n        CUSTOM_NAMESPACE_URI,\n        CUSTOM_TAG_LOCAL_NAME,",
-        "detail": "backup.dettach_disk",
+        "label": "app",
+        "importPath": "src.main",
+        "description": "src.main",
+        "isExtraImport": true,
+        "detail": "src.main",
         "documentation": {}
     },
     {
@@ -345,7 +309,7 @@
         "kind": 6,
         "importPath": "src.api.disk_routes",
         "description": "src.api.disk_routes",
-        "peekOfCode": "class AttachDiskRequest(BaseModel):\n    vm_name: str\n    qcow2_path: str\n    target_dev: str = None\nclass DetachDiskRequest(BaseModel):\n    vm_name: str\n    target_dev: str\n@router.post(\"/attach\")\nasync def attach_disk_endpoint(request: AttachDiskRequest):\n    try:",
+        "peekOfCode": "class AttachDiskRequest(BaseModel):\n    vm_name: str = Field(..., description=\"Name of the virtual machine\")\n    qcow2_path: str = Field(..., description=\"Path to the QCOW2 disk image\")\n    target_dev: str = Field(None, description=\"Target device name (auto-assigned if not provided)\")\nclass DetachDiskRequest(BaseModel):\n    vm_name: str = Field(..., description=\"Name of the virtual machine\")\n    target_dev: str = Field(..., description=\"Target device name to detach\")\n@router.post(\"/attach\", summary=\"Attach disk to VM\")\nasync def attach_disk_endpoint(request: AttachDiskRequest):\n    \"\"\"",
         "detail": "src.api.disk_routes",
         "documentation": {}
     },
@@ -354,7 +318,16 @@
         "kind": 6,
         "importPath": "src.api.disk_routes",
         "description": "src.api.disk_routes",
-        "peekOfCode": "class DetachDiskRequest(BaseModel):\n    vm_name: str\n    target_dev: str\n@router.post(\"/attach\")\nasync def attach_disk_endpoint(request: AttachDiskRequest):\n    try:\n        conn, dom = get_libvirt_domain(request.vm_name)\n        if not request.target_dev:\n            request.target_dev = get_next_available_virtio_dev(dom)\n        success = attach_qcow2_disk(dom, request.qcow2_path, request.target_dev)",
+        "peekOfCode": "class DetachDiskRequest(BaseModel):\n    vm_name: str = Field(..., description=\"Name of the virtual machine\")\n    target_dev: str = Field(..., description=\"Target device name to detach\")\n@router.post(\"/attach\", summary=\"Attach disk to VM\")\nasync def attach_disk_endpoint(request: AttachDiskRequest):\n    \"\"\"\n    Attach a QCOW2 disk to a running virtual machine.\n    - **vm_name**: Name of the target VM\n    - **qcow2_path**: Full path to the QCOW2 disk file\n    - **target_dev**: Device name (optional, auto-assigned if not provided)",
+        "detail": "src.api.disk_routes",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "src.api.disk_routes",
+        "description": "src.api.disk_routes",
+        "peekOfCode": "logger = logging.getLogger(__name__)\nrouter = APIRouter(prefix=\"/disk\", tags=[\"disk\"])\nclass AttachDiskRequest(BaseModel):\n    vm_name: str = Field(..., description=\"Name of the virtual machine\")\n    qcow2_path: str = Field(..., description=\"Path to the QCOW2 disk image\")\n    target_dev: str = Field(None, description=\"Target device name (auto-assigned if not provided)\")\nclass DetachDiskRequest(BaseModel):\n    vm_name: str = Field(..., description=\"Name of the virtual machine\")\n    target_dev: str = Field(..., description=\"Target device name to detach\")\n@router.post(\"/attach\", summary=\"Attach disk to VM\")",
         "detail": "src.api.disk_routes",
         "documentation": {}
     },
@@ -363,7 +336,7 @@
         "kind": 5,
         "importPath": "src.api.disk_routes",
         "description": "src.api.disk_routes",
-        "peekOfCode": "router = APIRouter(prefix=\"/disk\", tags=[\"disk\"])\nclass AttachDiskRequest(BaseModel):\n    vm_name: str\n    qcow2_path: str\n    target_dev: str = None\nclass DetachDiskRequest(BaseModel):\n    vm_name: str\n    target_dev: str\n@router.post(\"/attach\")\nasync def attach_disk_endpoint(request: AttachDiskRequest):",
+        "peekOfCode": "router = APIRouter(prefix=\"/disk\", tags=[\"disk\"])\nclass AttachDiskRequest(BaseModel):\n    vm_name: str = Field(..., description=\"Name of the virtual machine\")\n    qcow2_path: str = Field(..., description=\"Path to the QCOW2 disk image\")\n    target_dev: str = Field(None, description=\"Target device name (auto-assigned if not provided)\")\nclass DetachDiskRequest(BaseModel):\n    vm_name: str = Field(..., description=\"Name of the virtual machine\")\n    target_dev: str = Field(..., description=\"Target device name to detach\")\n@router.post(\"/attach\", summary=\"Attach disk to VM\")\nasync def attach_disk_endpoint(request: AttachDiskRequest):",
         "detail": "src.api.disk_routes",
         "documentation": {}
     },
@@ -372,7 +345,7 @@
         "kind": 2,
         "importPath": "src.modules.disk_attach",
         "description": "src.modules.disk_attach",
-        "peekOfCode": "def get_libvirt_domain(vm_name: str) -> Tuple[libvirt.virConnect, libvirt.virDomain]:\n    conn = libvirt.open('qemu:///system')\n    if conn is None:\n        raise RuntimeError('Failed to open connection to qemu:///system')\n    dom = conn.lookupByName(vm_name)\n    return conn, dom\ndef get_next_available_virtio_dev(dom: libvirt.virDomain) -> str:\n    xml_desc = dom.XMLDesc(libvirt.VIR_DOMAIN_XML_LIVE)\n    root = ET.fromstring(xml_desc)\n    disk_elements = root.findall(\".//lib:disk\", NAMESPACES)",
+        "peekOfCode": "def get_libvirt_domain(vm_name: str) -> Tuple[libvirt.virConnect, libvirt.virDomain]:\n    \"\"\"\n    Establish libvirt connection and lookup domain.\n    Args:\n        vm_name: Name of the virtual machine\n    Returns:\n        Tuple of (connection, domain) objects\n    Raises:\n        RuntimeError: If connection fails or domain not found\n    \"\"\"",
         "detail": "src.modules.disk_attach",
         "documentation": {}
     },
@@ -381,7 +354,7 @@
         "kind": 2,
         "importPath": "src.modules.disk_attach",
         "description": "src.modules.disk_attach",
-        "peekOfCode": "def get_next_available_virtio_dev(dom: libvirt.virDomain) -> str:\n    xml_desc = dom.XMLDesc(libvirt.VIR_DOMAIN_XML_LIVE)\n    root = ET.fromstring(xml_desc)\n    disk_elements = root.findall(\".//lib:disk\", NAMESPACES)\n    used_all_dev_names = set()\n    for disk in disk_elements:\n        target_element = disk.find('lib:target', NAMESPACES)\n        if target_element is not None:\n            dev = target_element.get('dev')\n            if dev:",
+        "peekOfCode": "def get_next_available_virtio_dev(dom: libvirt.virDomain) -> str:\n    \"\"\"\n    Find next available VirtIO device name.\n    Args:\n        dom: libvirt Domain object\n    Returns:\n        Next available device name (e.g., 'vda', 'vdb')\n    Raises:\n        RuntimeError: If no available device names found\n    \"\"\"",
         "detail": "src.modules.disk_attach",
         "documentation": {}
     },
@@ -390,7 +363,16 @@
         "kind": 2,
         "importPath": "src.modules.disk_attach",
         "description": "src.modules.disk_attach",
-        "peekOfCode": "def attach_qcow2_disk(dom: libvirt.virDomain, qcow2_path: str, target_dev: str) -> bool:\n    try:\n        # Check if disk already attached\n        xml_desc = dom.XMLDesc(libvirt.VIR_DOMAIN_XML_LIVE)\n        root = ET.fromstring(xml_desc)\n        for disk in root.findall(\".//lib:disk\", NAMESPACES):\n            target = disk.find('lib:target', NAMESPACES)\n            source = disk.find('lib:source', NAMESPACES)\n            if (target is not None and target.get('dev') == target_dev and\n                source is not None and source.get('file') == qcow2_path):",
+        "peekOfCode": "def attach_qcow2_disk(dom: libvirt.virDomain, qcow2_path: str, target_dev: str) -> bool:\n    \"\"\"\n    Attach QCOW2 disk to running VM.\n    Args:\n        dom: libvirt Domain object\n        qcow2_path: Path to QCOW2 disk image\n        target_dev: Target device name (e.g., 'vdb')\n    Returns:\n        True if successful, False otherwise\n    \"\"\"",
+        "detail": "src.modules.disk_attach",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "src.modules.disk_attach",
+        "description": "src.modules.disk_attach",
+        "peekOfCode": "logger = logging.getLogger(__name__)\nQCOW2_DEFAULT_SIZE = \"1G\"\nLIBVIRT_DOMAIN_NAMESPACE = \"http://libvirt.org/schemas/domain/1.0\"\nNAMESPACES = {'lib': LIBVIRT_DOMAIN_NAMESPACE}\nVIRTIO_DISK_PREFIX = \"vd\"\ndef _letters_to_int(s: str) -> int:\n    \"\"\"\n    Convert letter sequence to 0-indexed integer.\n    Args:\n        s: Letter sequence (e.g., 'a', 'b', 'aa')",
         "detail": "src.modules.disk_attach",
         "documentation": {}
     },
@@ -399,7 +381,7 @@
         "kind": 5,
         "importPath": "src.modules.disk_attach",
         "description": "src.modules.disk_attach",
-        "peekOfCode": "QCOW2_DEFAULT_SIZE = \"1G\"\nLIBVIRT_DOMAIN_NAMESPACE = \"http://libvirt.org/schemas/domain/1.0\"\nNAMESPACES = {'lib': LIBVIRT_DOMAIN_NAMESPACE}\nVIRTIO_DISK_PREFIX = \"vd\"\ndef _letters_to_int(s: str) -> int:\n    res = 0\n    for char in s:\n        res = res * 26 + (ord(char) - ord('a') + 1)\n    return res - 1\ndef _int_to_letters(n: int) -> str:",
+        "peekOfCode": "QCOW2_DEFAULT_SIZE = \"1G\"\nLIBVIRT_DOMAIN_NAMESPACE = \"http://libvirt.org/schemas/domain/1.0\"\nNAMESPACES = {'lib': LIBVIRT_DOMAIN_NAMESPACE}\nVIRTIO_DISK_PREFIX = \"vd\"\ndef _letters_to_int(s: str) -> int:\n    \"\"\"\n    Convert letter sequence to 0-indexed integer.\n    Args:\n        s: Letter sequence (e.g., 'a', 'b', 'aa')\n    Returns:",
         "detail": "src.modules.disk_attach",
         "documentation": {}
     },
@@ -408,7 +390,7 @@
         "kind": 5,
         "importPath": "src.modules.disk_attach",
         "description": "src.modules.disk_attach",
-        "peekOfCode": "LIBVIRT_DOMAIN_NAMESPACE = \"http://libvirt.org/schemas/domain/1.0\"\nNAMESPACES = {'lib': LIBVIRT_DOMAIN_NAMESPACE}\nVIRTIO_DISK_PREFIX = \"vd\"\ndef _letters_to_int(s: str) -> int:\n    res = 0\n    for char in s:\n        res = res * 26 + (ord(char) - ord('a') + 1)\n    return res - 1\ndef _int_to_letters(n: int) -> str:\n    res = \"\"",
+        "peekOfCode": "LIBVIRT_DOMAIN_NAMESPACE = \"http://libvirt.org/schemas/domain/1.0\"\nNAMESPACES = {'lib': LIBVIRT_DOMAIN_NAMESPACE}\nVIRTIO_DISK_PREFIX = \"vd\"\ndef _letters_to_int(s: str) -> int:\n    \"\"\"\n    Convert letter sequence to 0-indexed integer.\n    Args:\n        s: Letter sequence (e.g., 'a', 'b', 'aa')\n    Returns:\n        0-indexed integer representation",
         "detail": "src.modules.disk_attach",
         "documentation": {}
     },
@@ -417,7 +399,7 @@
         "kind": 5,
         "importPath": "src.modules.disk_attach",
         "description": "src.modules.disk_attach",
-        "peekOfCode": "NAMESPACES = {'lib': LIBVIRT_DOMAIN_NAMESPACE}\nVIRTIO_DISK_PREFIX = \"vd\"\ndef _letters_to_int(s: str) -> int:\n    res = 0\n    for char in s:\n        res = res * 26 + (ord(char) - ord('a') + 1)\n    return res - 1\ndef _int_to_letters(n: int) -> str:\n    res = \"\"\n    while True:",
+        "peekOfCode": "NAMESPACES = {'lib': LIBVIRT_DOMAIN_NAMESPACE}\nVIRTIO_DISK_PREFIX = \"vd\"\ndef _letters_to_int(s: str) -> int:\n    \"\"\"\n    Convert letter sequence to 0-indexed integer.\n    Args:\n        s: Letter sequence (e.g., 'a', 'b', 'aa')\n    Returns:\n        0-indexed integer representation\n    \"\"\"",
         "detail": "src.modules.disk_attach",
         "documentation": {}
     },
@@ -426,7 +408,7 @@
         "kind": 5,
         "importPath": "src.modules.disk_attach",
         "description": "src.modules.disk_attach",
-        "peekOfCode": "VIRTIO_DISK_PREFIX = \"vd\"\ndef _letters_to_int(s: str) -> int:\n    res = 0\n    for char in s:\n        res = res * 26 + (ord(char) - ord('a') + 1)\n    return res - 1\ndef _int_to_letters(n: int) -> str:\n    res = \"\"\n    while True:\n        res = chr(ord('a') + (n % 26)) + res",
+        "peekOfCode": "VIRTIO_DISK_PREFIX = \"vd\"\ndef _letters_to_int(s: str) -> int:\n    \"\"\"\n    Convert letter sequence to 0-indexed integer.\n    Args:\n        s: Letter sequence (e.g., 'a', 'b', 'aa')\n    Returns:\n        0-indexed integer representation\n    \"\"\"\n    res = 0",
         "detail": "src.modules.disk_attach",
         "documentation": {}
     },
@@ -435,7 +417,7 @@
         "kind": 2,
         "importPath": "src.modules.disk_detach",
         "description": "src.modules.disk_detach",
-        "peekOfCode": "def get_disk_xml_for_target_dev(dom: libvirt.virDomain, target_dev: str) -> str:\n    current_dom_xml = dom.XMLDesc(0)\n    root = ET.fromstring(current_dom_xml)\n    for disk_elem in root.findall(\".//disk\"):\n        target_elem = disk_elem.find(\"target\")\n        if target_elem is not None and target_elem.get(\"dev\") == target_dev:\n            source_elem = disk_elem.find(\"source\")\n            if source_elem is None or not source_elem.get(\"file\"):\n                raise ValueError(f\"Disk '{target_dev}' is not a file-backed disk\")\n            return ET.tostring(disk_elem, encoding='unicode')",
+        "peekOfCode": "def get_disk_xml_for_target_dev(dom: libvirt.virDomain, target_dev: str) -> str:\n    \"\"\"\n    Extract XML description of specific disk from VM's domain XML.\n    Args:\n        dom: libvirt Domain object\n        target_dev: Target device name (e.g., 'vdb')\n    Returns:\n        XML string of the disk element\n    Raises:\n        ValueError: If disk not found or not file-backed",
         "detail": "src.modules.disk_detach",
         "documentation": {}
     },
@@ -444,7 +426,7 @@
         "kind": 2,
         "importPath": "src.modules.disk_detach",
         "description": "src.modules.disk_detach",
-        "peekOfCode": "def poll_for_disk_removal(dom: libvirt.virDomain, target_dev: str, timeout: int = 60) -> bool:\n    max_retries = int(timeout / 0.5)\n    for i in range(max_retries):\n        current_dom_xml_live = dom.XMLDesc(libvirt.VIR_DOMAIN_XML_LIVE)\n        root_live = ET.fromstring(current_dom_xml_live)\n        disk_found = False\n        for disk_elem_live in root_live.findall(\".//disk\"):\n            target_elem_live = disk_elem_live.find(\"target\")\n            if target_elem_live is not None and target_elem_live.get(\"dev\") == target_dev:\n                disk_found = True",
+        "peekOfCode": "def poll_for_disk_removal(dom: libvirt.virDomain, target_dev: str, timeout: int = 60) -> bool:\n    \"\"\"\n    Poll VM's live XML to confirm disk removal.\n    Args:\n        dom: libvirt Domain object\n        target_dev: Target device name to check for removal\n        timeout: Maximum time to wait in seconds\n    Returns:\n        True if disk successfully removed, False if timeout\n    \"\"\"",
         "detail": "src.modules.disk_detach",
         "documentation": {}
     },
@@ -453,8 +435,53 @@
         "kind": 2,
         "importPath": "src.modules.disk_detach",
         "description": "src.modules.disk_detach",
-        "peekOfCode": "def detach_disk(conn: libvirt.virConnect, vm_name: str, target_dev: str) -> bool:\n    try:\n        dom = conn.lookupByName(vm_name)\n        if dom is None:\n            raise ValueError(f'VM \"{vm_name}\" not found')\n        disk_xml_to_detach = get_disk_xml_for_target_dev(dom, target_dev)\n        detach_flags = libvirt.VIR_DOMAIN_AFFECT_LIVE | libvirt.VIR_DOMAIN_AFFECT_CONFIG\n        ret = dom.detachDeviceFlags(disk_xml_to_detach, detach_flags)\n        if ret != 0:\n            raise RuntimeError(f\"Failed to initiate detach operation\")",
+        "peekOfCode": "def detach_disk(conn: libvirt.virConnect, vm_name: str, target_dev: str) -> bool:\n    \"\"\"\n    Detach disk from running VM.\n    Args:\n        conn: libvirt connection object\n        vm_name: Name of the virtual machine\n        target_dev: Target device name to detach\n    Returns:\n        True if successful, False otherwise\n    \"\"\"",
         "detail": "src.modules.disk_detach",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "src.modules.disk_detach",
+        "description": "src.modules.disk_detach",
+        "peekOfCode": "logger = logging.getLogger(__name__)\ndef get_disk_xml_for_target_dev(dom: libvirt.virDomain, target_dev: str) -> str:\n    \"\"\"\n    Extract XML description of specific disk from VM's domain XML.\n    Args:\n        dom: libvirt Domain object\n        target_dev: Target device name (e.g., 'vdb')\n    Returns:\n        XML string of the disk element\n    Raises:",
+        "detail": "src.modules.disk_detach",
+        "documentation": {}
+    },
+    {
+        "label": "logger",
+        "kind": 5,
+        "importPath": "src.main",
+        "description": "src.main",
+        "peekOfCode": "logger = logging.getLogger(__name__)\n# Environment variables\nPORT = int(os.getenv(\"PORT\", 8000))\nDEBUG = os.getenv(\"DEBUG\", \"false\").lower() == \"true\"\nHOST = os.getenv(\"HOST\", \"0.0.0.0\")\napp = FastAPI(\n    title=\"KVM Disk Manager\", \n    version=\"1.0.0\",\n    debug=DEBUG\n)",
+        "detail": "src.main",
+        "documentation": {}
+    },
+    {
+        "label": "PORT",
+        "kind": 5,
+        "importPath": "src.main",
+        "description": "src.main",
+        "peekOfCode": "PORT = int(os.getenv(\"PORT\", 8000))\nDEBUG = os.getenv(\"DEBUG\", \"false\").lower() == \"true\"\nHOST = os.getenv(\"HOST\", \"0.0.0.0\")\napp = FastAPI(\n    title=\"KVM Disk Manager\", \n    version=\"1.0.0\",\n    debug=DEBUG\n)\napp.include_router(disk_routes.router, prefix=\"/api/v1\")\n@app.get(\"/health\")",
+        "detail": "src.main",
+        "documentation": {}
+    },
+    {
+        "label": "DEBUG",
+        "kind": 5,
+        "importPath": "src.main",
+        "description": "src.main",
+        "peekOfCode": "DEBUG = os.getenv(\"DEBUG\", \"false\").lower() == \"true\"\nHOST = os.getenv(\"HOST\", \"0.0.0.0\")\napp = FastAPI(\n    title=\"KVM Disk Manager\", \n    version=\"1.0.0\",\n    debug=DEBUG\n)\napp.include_router(disk_routes.router, prefix=\"/api/v1\")\n@app.get(\"/health\")\nasync def health_check():",
+        "detail": "src.main",
+        "documentation": {}
+    },
+    {
+        "label": "HOST",
+        "kind": 5,
+        "importPath": "src.main",
+        "description": "src.main",
+        "peekOfCode": "HOST = os.getenv(\"HOST\", \"0.0.0.0\")\napp = FastAPI(\n    title=\"KVM Disk Manager\", \n    version=\"1.0.0\",\n    debug=DEBUG\n)\napp.include_router(disk_routes.router, prefix=\"/api/v1\")\n@app.get(\"/health\")\nasync def health_check():\n    \"\"\"Health check endpoint for container orchestration.\"\"\"",
+        "detail": "src.main",
         "documentation": {}
     },
     {
@@ -462,8 +489,107 @@
         "kind": 5,
         "importPath": "src.main",
         "description": "src.main",
-        "peekOfCode": "app = FastAPI(title=\"KVM Disk Manager\", version=\"1.0.0\")\napp.include_router(disk_routes.router, prefix=\"/api/v1\")\n@app.get(\"/health\")\nasync def health_check():\n    return {\"status\": \"healthy\"}\nif __name__ == \"__main__\":\n    import uvicorn\n    uvicorn.run(app, host=\"0.0.0.0\", port=8000)",
+        "peekOfCode": "app = FastAPI(\n    title=\"KVM Disk Manager\", \n    version=\"1.0.0\",\n    debug=DEBUG\n)\napp.include_router(disk_routes.router, prefix=\"/api/v1\")\n@app.get(\"/health\")\nasync def health_check():\n    \"\"\"Health check endpoint for container orchestration.\"\"\"\n    return {\"status\": \"healthy\", \"version\": \"1.0.0\"}",
         "detail": "src.main",
+        "documentation": {}
+    },
+    {
+        "label": "test_health_endpoint",
+        "kind": 2,
+        "importPath": "tests.integration.test_api_endpoints",
+        "description": "tests.integration.test_api_endpoints",
+        "peekOfCode": "def test_health_endpoint():\n    \"\"\"Test health check endpoint.\"\"\"\n    response = client.get(\"/health\")\n    assert response.status_code == 200\n    assert response.json() == {\"status\": \"healthy\", \"version\": \"1.0.0\"}\n@patch('src.api.disk_routes.get_libvirt_domain')\n@patch('src.api.disk_routes.get_next_available_virtio_dev')\n@patch('src.api.disk_routes.attach_qcow2_disk')\ndef test_attach_disk_success(mock_attach, mock_get_dev, mock_get_domain):\n    \"\"\"Test successful disk attachment.\"\"\"",
+        "detail": "tests.integration.test_api_endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "test_attach_disk_success",
+        "kind": 2,
+        "importPath": "tests.integration.test_api_endpoints",
+        "description": "tests.integration.test_api_endpoints",
+        "peekOfCode": "def test_attach_disk_success(mock_attach, mock_get_dev, mock_get_domain):\n    \"\"\"Test successful disk attachment.\"\"\"\n    mock_conn = Mock()\n    mock_dom = Mock()\n    mock_get_domain.return_value = (mock_conn, mock_dom)\n    mock_get_dev.return_value = 'vdb'\n    mock_attach.return_value = True\n    response = client.post(\"/api/v1/disk/attach\", json={\n        \"vm_name\": \"test_vm\",\n        \"qcow2_path\": \"/path/to/disk.qcow2\"",
+        "detail": "tests.integration.test_api_endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "test_attach_disk_vm_not_found",
+        "kind": 2,
+        "importPath": "tests.integration.test_api_endpoints",
+        "description": "tests.integration.test_api_endpoints",
+        "peekOfCode": "def test_attach_disk_vm_not_found(mock_get_domain):\n    \"\"\"Test VM not found scenario.\"\"\"\n    import libvirt\n    mock_get_domain.side_effect = libvirt.libvirtError(\"Domain not found\")\n    response = client.post(\"/api/v1/disk/attach\", json={\n        \"vm_name\": \"nonexistent_vm\",\n        \"qcow2_path\": \"/path/to/disk.qcow2\"\n    })\n    assert response.status_code == 404\n    assert \"not found\" in response.json()[\"detail\"]",
+        "detail": "tests.integration.test_api_endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "test_detach_disk_success",
+        "kind": 2,
+        "importPath": "tests.integration.test_api_endpoints",
+        "description": "tests.integration.test_api_endpoints",
+        "peekOfCode": "def test_detach_disk_success(mock_detach, mock_open):\n    \"\"\"Test successful disk detachment.\"\"\"\n    mock_conn = Mock()\n    mock_open.return_value = mock_conn\n    mock_detach.return_value = True\n    response = client.post(\"/api/v1/disk/detach\", json={\n        \"vm_name\": \"test_vm\",\n        \"target_dev\": \"vdb\"\n    })\n    assert response.status_code == 200",
+        "detail": "tests.integration.test_api_endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "client",
+        "kind": 5,
+        "importPath": "tests.integration.test_api_endpoints",
+        "description": "tests.integration.test_api_endpoints",
+        "peekOfCode": "client = TestClient(app)\ndef test_health_endpoint():\n    \"\"\"Test health check endpoint.\"\"\"\n    response = client.get(\"/health\")\n    assert response.status_code == 200\n    assert response.json() == {\"status\": \"healthy\", \"version\": \"1.0.0\"}\n@patch('src.api.disk_routes.get_libvirt_domain')\n@patch('src.api.disk_routes.get_next_available_virtio_dev')\n@patch('src.api.disk_routes.attach_qcow2_disk')\ndef test_attach_disk_success(mock_attach, mock_get_dev, mock_get_domain):",
+        "detail": "tests.integration.test_api_endpoints",
+        "documentation": {}
+    },
+    {
+        "label": "test_letters_to_int",
+        "kind": 2,
+        "importPath": "tests.unit.test_disk_attach",
+        "description": "tests.unit.test_disk_attach",
+        "peekOfCode": "def test_letters_to_int():\n    \"\"\"Test letter to integer conversion.\"\"\"\n    assert _letters_to_int('a') == 0\n    assert _letters_to_int('b') == 1\n    assert _letters_to_int('z') == 25\n    assert _letters_to_int('aa') == 26\ndef test_int_to_letters():\n    \"\"\"Test integer to letter conversion.\"\"\"\n    assert _int_to_letters(0) == 'a'\n    assert _int_to_letters(1) == 'b'",
+        "detail": "tests.unit.test_disk_attach",
+        "documentation": {}
+    },
+    {
+        "label": "test_int_to_letters",
+        "kind": 2,
+        "importPath": "tests.unit.test_disk_attach",
+        "description": "tests.unit.test_disk_attach",
+        "peekOfCode": "def test_int_to_letters():\n    \"\"\"Test integer to letter conversion.\"\"\"\n    assert _int_to_letters(0) == 'a'\n    assert _int_to_letters(1) == 'b'\n    assert _int_to_letters(25) == 'z'\n    assert _int_to_letters(26) == 'aa'\n@patch('src.modules.disk_attach.ET.fromstring')\ndef test_get_next_available_virtio_dev(mock_fromstring):\n    \"\"\"Test finding next available device.\"\"\"\n    mock_dom = Mock()",
+        "detail": "tests.unit.test_disk_attach",
+        "documentation": {}
+    },
+    {
+        "label": "test_get_next_available_virtio_dev",
+        "kind": 2,
+        "importPath": "tests.unit.test_disk_attach",
+        "description": "tests.unit.test_disk_attach",
+        "peekOfCode": "def test_get_next_available_virtio_dev(mock_fromstring):\n    \"\"\"Test finding next available device.\"\"\"\n    mock_dom = Mock()\n    mock_dom.XMLDesc.return_value = '<domain></domain>'\n    mock_root = Mock()\n    mock_root.findall.return_value = []\n    mock_fromstring.return_value = mock_root\n    result = get_next_available_virtio_dev(mock_dom)\n    assert result == 'vda'",
+        "detail": "tests.unit.test_disk_attach",
+        "documentation": {}
+    },
+    {
+        "label": "test_get_disk_xml_for_target_dev_success",
+        "kind": 2,
+        "importPath": "tests.unit.test_disk_detach",
+        "description": "tests.unit.test_disk_detach",
+        "peekOfCode": "def test_get_disk_xml_for_target_dev_success(mock_fromstring):\n    \"\"\"Test successful disk XML retrieval.\"\"\"\n    mock_dom = Mock()\n    mock_dom.XMLDesc.return_value = '<domain></domain>'\n    mock_dom.name.return_value = 'test_vm'\n    # Mock disk element with target and source\n    mock_disk = Mock()\n    mock_target = Mock()\n    mock_target.get.return_value = 'vdb'\n    mock_source = Mock()",
+        "detail": "tests.unit.test_disk_detach",
+        "documentation": {}
+    },
+    {
+        "label": "test_get_disk_xml_for_target_dev_not_found",
+        "kind": 2,
+        "importPath": "tests.unit.test_disk_detach",
+        "description": "tests.unit.test_disk_detach",
+        "peekOfCode": "def test_get_disk_xml_for_target_dev_not_found():\n    \"\"\"Test disk not found scenario.\"\"\"\n    mock_dom = Mock()\n    mock_dom.XMLDesc.return_value = '<domain></domain>'\n    mock_dom.name.return_value = 'test_vm'\n    with patch('src.modules.disk_detach.ET.fromstring') as mock_fromstring:\n        mock_root = Mock()\n        mock_root.findall.return_value = []\n        mock_fromstring.return_value = mock_root\n        with pytest.raises(ValueError, match=\"Disk with target 'vdb' not found\"):",
+        "detail": "tests.unit.test_disk_detach",
+        "documentation": {}
+    },
+    {
+        "label": "test_poll_for_disk_removal_success",
+        "kind": 2,
+        "importPath": "tests.unit.test_disk_detach",
+        "description": "tests.unit.test_disk_detach",
+        "peekOfCode": "def test_poll_for_disk_removal_success(mock_fromstring, mock_sleep):\n    \"\"\"Test successful disk removal polling.\"\"\"\n    mock_dom = Mock()\n    mock_dom.XMLDesc.return_value = '<domain></domain>'\n    mock_dom.name.return_value = 'test_vm'\n    mock_root = Mock()\n    mock_root.findall.return_value = []  # No disks found = removed\n    mock_fromstring.return_value = mock_root\n    result = poll_for_disk_removal(mock_dom, 'vdb', timeout=1)\n    assert result is True",
+        "detail": "tests.unit.test_disk_detach",
         "documentation": {}
     }
 ]
