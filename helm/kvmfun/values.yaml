@@ -40,10 +40,100 @@ tolerations: []
 affinity: {}
 
 # Environment variables for the application
+# All values are strings and will be parsed by the application as needed
 env:
+  # =============================================================================
+  # SERVER CONFIGURATION
+  # =============================================================================
+  
+  # Enable debug mode for development (affects FastAPI debug mode and logging)
   - name: DEBUG
     value: "false"
+  
+  # Server bind address (0.0.0.0 for all interfaces, 127.0.0.1 for localhost only)
   - name: HOST
     value: "0.0.0.0"
+  
+  # Server port number (must match container port in deployment)
   - name: PORT
     value: "8000"
+  
+  # =============================================================================
+  # APPLICATION METADATA
+  # =============================================================================
+  
+  # Application title displayed in OpenAPI documentation
+  - name: APP_TITLE
+    value: "KVM Disk Manager"
+  
+  # Application version for API responses and health checks
+  - name: APP_VERSION
+    value: "1.0.0"
+  
+  # =============================================================================
+  # LIBVIRT CONFIGURATION
+  # =============================================================================
+  
+  # Libvirt connection URI (qemu:///system for system-wide, qemu:///session for user)
+  - name: LIBVIRT_URI
+    value: "qemu:///system"
+  
+  # =============================================================================
+  # DISK MANAGEMENT CONFIGURATION
+  # =============================================================================
+  
+  # Prefix for virtio disk device names (vd = virtio disk, hd = IDE disk)
+  - name: VIRTIO_DISK_PREFIX
+    value: "vd"
+  
+  # Maximum number of virtio devices to check (702 = vda through vdzz)
+  - name: MAX_VIRTIO_DEVICES
+    value: "702"
+  
+  # Default size for newly created QCOW2 disks (not currently used)
+  - name: QCOW2_DEFAULT_SIZE
+    value: "1G"
+  
+  # =============================================================================
+  # OPERATION TIMEOUTS AND RETRIES
+  # =============================================================================
+  
+  # Number of attempts to confirm disk attachment after attach command
+  - name: DISK_ATTACH_CONFIRM_RETRIES
+    value: "5"
+  
+  # Delay between disk attachment confirmation attempts (seconds)
+  - name: DISK_ATTACH_CONFIRM_DELAY
+    value: "0.5"
+  
+  # Maximum time to wait for disk detachment confirmation (seconds)
+  - name: DISK_DETACH_TIMEOUT
+    value: "60"
+  
+  # Interval between disk detachment polling attempts (seconds)
+  - name: DISK_DETACH_POLL_INTERVAL
+    value: "0.5"
+  
+  # =============================================================================
+  # LOGGING CONFIGURATION
+  # =============================================================================
+  
+  # Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+  - name: LOG_LEVEL
+    value: "INFO"
+  
+  # Python logging format string for log messages
+  - name: LOG_FORMAT
+    value: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # =============================================================================
+  # API ROUTING CONFIGURATION
+  # =============================================================================
+  
+  # Base prefix for all API endpoints (e.g., /api/v1/disk/attach)
+  - name: API_PREFIX
+    value: "/api/v1"
+  
+  # Prefix for disk management endpoints within API (e.g., /disk/attach)
+  - name: DISK_ROUTER_PREFIX
+    value: "/disk"

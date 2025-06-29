@@ -1,95 +1,233 @@
 from fastapi import APIRouter, HTTPException, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 import libvirt
 import logging
+import re
+import os
 from src.modules.disk_attach import get_libvirt_domain, get_next_available_virtio_dev, attach_qcow2_disk
 from src.modules.disk_detach import detach_disk
+from src.config import config
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix="/disk", tags=["disk"])
+router = APIRouter(prefix=config.DISK_ROUTER_PREFIX, tags=["disk"])
 
 class AttachDiskRequest(BaseModel):
-    vm_name: str = Field(..., description="Name of the virtual machine")
-    qcow2_path: str = Field(..., description="Path to the QCOW2 disk image")
+    """Request model for disk attachment."""
+    vm_name: str = Field(..., description="Name of the virtual machine", min_length=1, max_length=255)
+    qcow2_path: str = Field(..., description="Path to the QCOW2 disk image", min_length=1)
     target_dev: str = Field(None, description="Target device name (auto-assigned if not provided)")
+    
+    @validator('vm_name')
+    def validate_vm_name(cls, v):
+        if not re.match(r'^[a-zA-Z0-9_-]+$', v):
+            raise ValueError('VM name must contain only alphanumeric characters, hyphens, and underscores')
+        return v
+    
+    @validator('qcow2_path')
+    def validate_qcow2_path(cls, v):
+        if not v.endswith('.qcow2'):
+            raise ValueError('Disk path must end with .qcow2')
+        return v
+    
+    @validator('target_dev')
+    def validate_target_dev(cls, v):
+        if v and not re.match(r'^vd[a-z]+$', v):
+            raise ValueError('Target device must follow format vd[a-z]+ (e.g., vda, vdb)')
+        return v
 
 class DetachDiskRequest(BaseModel):
-    vm_name: str = Field(..., description="Name of the virtual machine")
-    target_dev: str = Field(..., description="Target device name to detach")
+    """Request model for disk detachment."""
+    vm_name: str = Field(..., description="Name of the virtual machine", min_length=1, max_length=255)
+    target_dev: str = Field(..., description="Target device name to detach", min_length=1)
+    
+    @validator('vm_name')
+    def validate_vm_name(cls, v):
+        if not re.match(r'^[a-zA-Z0-9_-]+$', v):
+            raise ValueError('VM name must contain only alphanumeric characters, hyphens, and underscores')
+        return v
+    
+    @validator('target_dev')
+    def validate_target_dev(cls, v):
+        if not re.match(r'^vd[a-z]+$', v):
+            raise ValueError('Target device must follow format vd[a-z]+ (e.g., vda, vdb)')
+        return v
 
-@router.post("/attach", summary="Attach disk to VM")
+@router.post("/attach", 
+            summary="Attach disk to VM",
+            description="Attach a QCOW2 disk to a running virtual machine with automatic device assignment",
+            responses={
+                200: {"description": "Disk successfully attached"},
+                400: {"description": "Invalid request parameters"},
+                404: {"description": "VM not found"},
+                409: {"description": "Device already in use or disk already attached"},
+                500: {"description": "Internal server error"}
+            })
 async def attach_disk_endpoint(request: AttachDiskRequest):
     """
     Attach a QCOW2 disk to a running virtual machine.
     
-    - **vm_name**: Name of the target VM
-    - **qcow2_path**: Full path to the QCOW2 disk file
-    - **target_dev**: Device name (optional, auto-assigned if not provided)
+    This endpoint performs hot-attach of a disk to a running VM. The disk will be
+    automatically assigned to the next available virtio device if target_dev is not specified.
+    
+    Args:
+        request: AttachDiskRequest containing:
+            - vm_name: Name of the target VM (alphanumeric, hyphens, underscores only)
+            - qcow2_path: Full path to the QCOW2 disk file (must end with .qcow2)
+            - target_dev: Device name (optional, format: vd[a-z]+)
+    
+    Returns:
+        dict: Success status and assigned target device
+        
+    Raises:
+        HTTPException: 400 for invalid input, 404 for VM not found, 
+                      409 for conflicts, 500 for server errors
     """
-    logger.info(f"Attaching disk {request.qcow2_path} to VM {request.vm_name}")
+    logger.info(f"Disk attach request - VM: {request.vm_name}, Path: {request.qcow2_path}, Target: {request.target_dev}")
+    
+    # Validate disk file exists
+    if not os.path.exists(request.qcow2_path):
+        logger.error(f"Disk file not found: {request.qcow2_path}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
+                          detail=f"Disk file not found: {request.qcow2_path}")
+    
     try:
         conn, dom = get_libvirt_domain(request.vm_name)
+        logger.info(f"Successfully connected to VM '{request.vm_name}'")
         
         if not request.target_dev:
             request.target_dev = get_next_available_virtio_dev(dom)
+            logger.info(f"Auto-assigned target device: {request.target_dev}")
         
         success = attach_qcow2_disk(dom, request.qcow2_path, request.target_dev)
         conn.close()
         
         if success:
-            logger.info(f"Successfully attached disk as {request.target_dev}")
+            logger.info(f"Successfully attached disk '{request.qcow2_path}' as '{request.target_dev}' to VM '{request.vm_name}'")
             return {"status": "success", "target_dev": request.target_dev}
         else:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to attach disk")
+            logger.error(f"Failed to attach disk '{request.qcow2_path}' to VM '{request.vm_name}'")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                              detail="Failed to attach disk")
             
     except libvirt.libvirtError as e:
-        if "Domain not found" in str(e):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"VM '{request.vm_name}' not found")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        error_msg = str(e)
+        if "Domain not found" in error_msg:
+            logger.error(f"VM not found: {request.vm_name}")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                              detail=f"VM '{request.vm_name}' not found")
+        elif "already in use" in error_msg or "Target device" in error_msg:
+            logger.error(f"Device conflict for {request.target_dev}: {error_msg}")
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, 
+                              detail=f"Target device '{request.target_dev}' is already in use")
+        else:
+            logger.error(f"Libvirt error during disk attach: {error_msg}")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=error_msg)
+    except ValueError as e:
+        logger.error(f"Validation error during disk attach: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
-        logger.error(f"Error attaching disk: {e}")
+        logger.error(f"Unexpected error during disk attach: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@router.post("/detach", summary="Detach disk from VM")
+@router.post("/detach", 
+            summary="Detach disk from VM",
+            description="Detach a disk from a running virtual machine by target device name",
+            responses={
+                200: {"description": "Disk successfully detached"},
+                400: {"description": "Invalid request parameters"},
+                404: {"description": "VM or disk not found"},
+                500: {"description": "Internal server error"}
+            })
 async def detach_disk_endpoint(request: DetachDiskRequest):
     """
     Detach a disk from a running virtual machine.
     
-    - **vm_name**: Name of the target VM
-    - **target_dev**: Device name to detach (e.g., 'vdb')
-    """
-    logger.info(f"Detaching disk {request.target_dev} from VM {request.vm_name}")
-    try:
-        conn = libvirt.open('qemu:///system')
-        if conn is None:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to connect to libvirt")
+    This endpoint performs hot-detach of a disk from a running VM by specifying
+    the target device name.
+    
+    Args:
+        request: DetachDiskRequest containing:
+            - vm_name: Name of the target VM (alphanumeric, hyphens, underscores only)
+            - target_dev: Device name to detach (format: vd[a-z]+)
+    
+    Returns:
+        dict: Success status
         
+    Raises:
+        HTTPException: 400 for invalid input, 404 for VM/disk not found, 
+                      500 for server errors
+    """
+    logger.info(f"Disk detach request - VM: {request.vm_name}, Target: {request.target_dev}")
+    
+    try:
+        conn = libvirt.open(config.LIBVIRT_URI)
+        if conn is None:
+            logger.error("Failed to connect to libvirt")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                              detail="Failed to connect to libvirt")
+        
+        logger.info(f"Successfully connected to libvirt for VM '{request.vm_name}'")
         success = detach_disk(conn, request.vm_name, request.target_dev)
         conn.close()
         
         if success:
-            logger.info(f"Successfully detached disk {request.target_dev}")
+            logger.info(f"Successfully detached disk '{request.target_dev}' from VM '{request.vm_name}'")
             return {"status": "success"}
         else:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to detach disk")
+            logger.error(f"Failed to detach disk '{request.target_dev}' from VM '{request.vm_name}'")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                              detail="Failed to detach disk")
             
     except ValueError as e:
-        if "not found" in str(e):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        error_msg = str(e)
+        if "not found" in error_msg:
+            logger.error(f"VM or disk not found: {error_msg}")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error_msg)
+        else:
+            logger.error(f"Validation error during disk detach: {error_msg}")
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error_msg)
     except Exception as e:
-        logger.error(f"Error detaching disk: {e}")
+        logger.error(f"Unexpected error during disk detach: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@router.get("/list/{vm_name}", summary="List VM disks")
+@router.get("/list/{vm_name}", 
+           summary="List VM disks",
+           description="List all file-backed disks attached to a virtual machine",
+           responses={
+               200: {"description": "List of disks successfully retrieved"},
+               400: {"description": "Invalid VM name format"},
+               404: {"description": "VM not found"},
+               500: {"description": "Internal server error"}
+           })
 async def list_disks(vm_name: str):
     """
     List all disks attached to a virtual machine.
     
-    - **vm_name**: Name of the virtual machine
+    This endpoint retrieves information about all file-backed disks currently
+    attached to the specified virtual machine.
+    
+    Args:
+        vm_name: Name of the virtual machine (alphanumeric, hyphens, underscores only)
+    
+    Returns:
+        dict: VM name and list of attached disks with their properties
+        
+    Raises:
+        HTTPException: 400 for invalid VM name, 404 for VM not found, 
+                      500 for server errors
     """
+    logger.info(f"Disk list request for VM: {vm_name}")
+    
+    # Validate VM name format
+    if not re.match(r'^[a-zA-Z0-9_-]+$', vm_name):
+        logger.error(f"Invalid VM name format: {vm_name}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
+                          detail="VM name must contain only alphanumeric characters, hyphens, and underscores")
+    
     try:
         conn, dom = get_libvirt_domain(vm_name)
+        logger.info(f"Successfully connected to VM '{vm_name}'")
+        
         xml_desc = dom.XMLDesc(libvirt.VIR_DOMAIN_XML_LIVE)
         conn.close()
         
@@ -101,18 +239,26 @@ async def list_disks(vm_name: str):
             target = disk.find("target")
             source = disk.find("source")
             if target is not None and source is not None:
-                disks.append({
+                disk_info = {
                     "target_dev": target.get("dev"),
                     "source_file": source.get("file"),
                     "bus": target.get("bus")
-                })
+                }
+                disks.append(disk_info)
+                logger.debug(f"Found disk: {disk_info}")
         
+        logger.info(f"Successfully listed {len(disks)} disks for VM '{vm_name}'")
         return {"vm_name": vm_name, "disks": disks}
         
     except libvirt.libvirtError as e:
-        if "Domain not found" in str(e):
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"VM '{vm_name}' not found")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+        error_msg = str(e)
+        if "Domain not found" in error_msg:
+            logger.error(f"VM not found: {vm_name}")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
+                              detail=f"VM '{vm_name}' not found")
+        else:
+            logger.error(f"Libvirt error during disk list: {error_msg}")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=error_msg)
     except Exception as e:
-        logger.error(f"Error listing disks: {e}")
+        logger.error(f"Unexpected error during disk list for VM '{vm_name}': {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
