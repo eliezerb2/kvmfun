@@ -2,9 +2,9 @@ import libvirt
 import xml.etree.ElementTree as ET
 import time
 import logging
-import json
 from typing import Optional
 from src.config import config
+from src.modules.libvirt_utils import get_libvirt_connection, parse_domain_xml
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +33,7 @@ def get_disk_xml_for_target_dev(dom: libvirt.virDomain, target_dev: str) -> str:
     logger.info(f"Retrieving disk XML for device '{target_dev}' in VM '{vm_name}'")
     
     try:
-        current_dom_xml = dom.XMLDesc(0)
-        logger.debug(f"Retrieved VM configuration XML for '{vm_name}'")
-        
-        root = ET.fromstring(current_dom_xml)
+        root = parse_domain_xml(dom, live=False)
         
         for disk_elem in root.findall(".//disk"):
             target_elem = disk_elem.find("target")
@@ -100,8 +97,7 @@ def poll_for_disk_removal(dom: libvirt.virDomain, target_dev: str, timeout: Opti
         for attempt in range(max_retries):
             logger.debug(f"Polling attempt {attempt + 1}/{max_retries} for disk '{target_dev}' removal")
             
-            current_dom_xml_live = dom.XMLDesc(libvirt.VIR_DOMAIN_XML_LIVE)
-            root_live = ET.fromstring(current_dom_xml_live)
+            root_live = parse_domain_xml(dom, live=True)
             
             disk_found = False
             for disk_elem_live in root_live.findall(".//disk"):
@@ -129,61 +125,39 @@ def poll_for_disk_removal(dom: libvirt.virDomain, target_dev: str, timeout: Opti
         logger.error(f"Unexpected error during disk removal polling for VM '{vm_name}', device '{target_dev}': {e}")
         return False
 
+def _validate_vm_for_detach(dom: libvirt.virDomain) -> None:
+    """Validate VM is running and ready for hot-detach."""
+    vm_name = dom.name()
+    vm_state = dom.state()
+    logger.info(f"Found VM '{vm_name}' (ID: {dom.ID()}, State: {vm_state})")
+    
+    if vm_state[0] != libvirt.VIR_DOMAIN_RUNNING:
+        error_msg = f"VM '{vm_name}' is not running (state: {vm_state[0]})"
+        logger.error(error_msg)
+        raise ValueError(error_msg)
+
 def detach_disk(conn: libvirt.virConnect, vm_name: str, target_dev: str) -> bool:
-    """
-    Detach disk from running VM.
-    
-    Performs hot-detach of a disk device from a running virtual machine.
-    The operation includes validation, XML retrieval, detachment, and confirmation.
-    
-    Args:
-        conn: Active libvirt connection object
-        vm_name: Name of the virtual machine
-        target_dev: Target device name to detach (e.g., 'vdb', 'vdc')
-        
-    Returns:
-        bool: True if detachment successful and confirmed, False otherwise
-        
-    Raises:
-        ValueError: If VM not found or disk not found/invalid
-        RuntimeError: If detachment operation fails
-        libvirt.libvirtError: If libvirt operations fail
-        
-    Note:
-        - Uses live and config flags for detachment
-        - Confirms detachment by polling VM configuration
-        - Timeout controlled by DISK_DETACH_TIMEOUT configuration
-    """
+    """Detach disk from running VM."""
     logger.info(f"Starting disk detachment - VM: '{vm_name}', Device: '{target_dev}'")
     
     try:
-        # Lookup domain
         dom = conn.lookupByName(vm_name)
         if dom is None:
             error_msg = f'VM "{vm_name}" not found'
             logger.error(error_msg)
             raise ValueError(error_msg)
         
-        vm_state = dom.state()
-        logger.info(f"Found VM '{vm_name}' (ID: {dom.ID()}, State: {vm_state})")
+        _validate_vm_for_detach(dom)
         
-        # Validate VM is running (required for hot-detach)
-        if vm_state[0] != libvirt.VIR_DOMAIN_RUNNING:
-            error_msg = f"VM '{vm_name}' is not running (state: {vm_state[0]})"
-            logger.error(error_msg)
-            raise ValueError(error_msg)
-        
-        # Get disk XML before detachment
         logger.debug(f"Retrieving disk XML for device '{target_dev}'")
-        disk_xml_to_detach = get_disk_xml_for_target_dev(dom, target_dev)
+        disk_xml = get_disk_xml_for_target_dev(dom, target_dev)
         logger.info(f"Successfully retrieved disk XML for detachment")
-        logger.debug(f"Disk XML to detach: {disk_xml_to_detach}")
+        logger.debug(f"Disk XML to detach: {disk_xml}")
         
-        # Perform detachment
-        detach_flags = libvirt.VIR_DOMAIN_AFFECT_LIVE | libvirt.VIR_DOMAIN_AFFECT_CONFIG
-        logger.debug(f"Executing disk detachment with flags: {detach_flags}")
+        flags = libvirt.VIR_DOMAIN_AFFECT_LIVE | libvirt.VIR_DOMAIN_AFFECT_CONFIG
+        logger.debug(f"Executing disk detachment with flags: {flags}")
         
-        ret = dom.detachDeviceFlags(disk_xml_to_detach, detach_flags)
+        ret = dom.detachDeviceFlags(disk_xml, flags)
         if ret != 0:
             error_msg = f"detachDeviceFlags returned non-zero status: {ret}"
             logger.error(f"Detachment command failed for VM '{vm_name}', device '{target_dev}': {error_msg}")
@@ -191,7 +165,6 @@ def detach_disk(conn: libvirt.virConnect, vm_name: str, target_dev: str) -> bool
         
         logger.info(f"Disk detachment command executed successfully for VM '{vm_name}', device '{target_dev}'")
         
-        # Confirm detachment
         logger.debug(f"Starting detachment confirmation polling")
         if not poll_for_disk_removal(dom, target_dev):
             error_msg = f"Disk '{target_dev}' failed to detach within timeout ({config.DISK_DETACH_TIMEOUT}s)"
