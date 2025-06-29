@@ -4,8 +4,11 @@ import libvirt
 import logging
 import re
 import os
-from src.modules.disk_attach import get_libvirt_domain, get_next_available_virtio_dev, attach_qcow2_disk
+from src.modules.disk_attach import get_next_available_virtio_dev, attach_disk
 from src.modules.disk_detach import detach_disk
+from src.modules.libvirt_utils import get_libvirt_domain, get_libvirt_connection
+from src.modules.validation_utils import validate_vm_name, validate_target_device, validate_qcow2_path
+from src.modules.disk_utils import list_vm_disks
 from src.config import config
 
 logger = logging.getLogger(__name__)
@@ -18,22 +21,18 @@ class AttachDiskRequest(BaseModel):
     target_dev: str = Field(None, description="Target device name (auto-assigned if not provided)")
     
     @validator('vm_name')
-    def validate_vm_name(cls, v):
-        if not re.match(r'^[a-zA-Z0-9_-]+$', v):
-            raise ValueError('VM name must contain only alphanumeric characters, hyphens, and underscores')
-        return v
+    def validate_vm_name_field(cls, v):
+        return validate_vm_name(v)
     
     @validator('qcow2_path')
-    def validate_qcow2_path(cls, v):
+    def validate_qcow2_path_field(cls, v):
         if not v.endswith('.qcow2'):
             raise ValueError('Disk path must end with .qcow2')
         return v
     
     @validator('target_dev')
-    def validate_target_dev(cls, v):
-        if v and not re.match(r'^vd[a-z]+$', v):
-            raise ValueError('Target device must follow format vd[a-z]+ (e.g., vda, vdb)')
-        return v
+    def validate_target_dev_field(cls, v):
+        return validate_target_device(v)
 
 class DetachDiskRequest(BaseModel):
     """Request model for disk detachment."""
@@ -41,16 +40,12 @@ class DetachDiskRequest(BaseModel):
     target_dev: str = Field(..., description="Target device name to detach", min_length=1)
     
     @validator('vm_name')
-    def validate_vm_name(cls, v):
-        if not re.match(r'^[a-zA-Z0-9_-]+$', v):
-            raise ValueError('VM name must contain only alphanumeric characters, hyphens, and underscores')
-        return v
+    def validate_vm_name_field(cls, v):
+        return validate_vm_name(v)
     
     @validator('target_dev')
-    def validate_target_dev(cls, v):
-        if not re.match(r'^vd[a-z]+$', v):
-            raise ValueError('Target device must follow format vd[a-z]+ (e.g., vda, vdb)')
-        return v
+    def validate_target_dev_field(cls, v):
+        return validate_target_device(v)
 
 @router.post("/attach", 
             summary="Attach disk to VM",
@@ -84,11 +79,12 @@ async def attach_disk_endpoint(request: AttachDiskRequest):
     """
     logger.info(f"Disk attach request - VM: {request.vm_name}, Path: {request.qcow2_path}, Target: {request.target_dev}")
     
-    # Validate disk file exists
-    if not os.path.exists(request.qcow2_path):
-        logger.error(f"Disk file not found: {request.qcow2_path}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
-                          detail=f"Disk file not found: {request.qcow2_path}")
+    # Validate request parameters
+    try:
+        validate_qcow2_path(request.qcow2_path)
+    except ValueError as e:
+        logger.error(f"Validation error: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
     try:
         conn, dom = get_libvirt_domain(request.vm_name)
@@ -98,7 +94,7 @@ async def attach_disk_endpoint(request: AttachDiskRequest):
             request.target_dev = get_next_available_virtio_dev(dom)
             logger.info(f"Auto-assigned target device: {request.target_dev}")
         
-        success = attach_qcow2_disk(dom, request.qcow2_path, request.target_dev)
+        success = attach_disk(dom, request.qcow2_path, request.target_dev)
         conn.close()
         
         if success:
@@ -160,12 +156,7 @@ async def detach_disk_endpoint(request: DetachDiskRequest):
     logger.info(f"Disk detach request - VM: {request.vm_name}, Target: {request.target_dev}")
     
     try:
-        conn = libvirt.open(config.LIBVIRT_URI)
-        if conn is None:
-            logger.error("Failed to connect to libvirt")
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-                              detail="Failed to connect to libvirt")
-        
+        conn = get_libvirt_connection()
         logger.info(f"Successfully connected to libvirt for VM '{request.vm_name}'")
         success = detach_disk(conn, request.vm_name, request.target_dev)
         conn.close()
@@ -219,33 +210,18 @@ async def list_disks(vm_name: str):
     logger.info(f"Disk list request for VM: {vm_name}")
     
     # Validate VM name format
-    if not re.match(r'^[a-zA-Z0-9_-]+$', vm_name):
-        logger.error(f"Invalid VM name format: {vm_name}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, 
-                          detail="VM name must contain only alphanumeric characters, hyphens, and underscores")
+    try:
+        validate_vm_name(vm_name)
+    except ValueError as e:
+        logger.error(f"Invalid VM name: {e}")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
     try:
         conn, dom = get_libvirt_domain(vm_name)
         logger.info(f"Successfully connected to VM '{vm_name}'")
         
-        xml_desc = dom.XMLDesc(libvirt.VIR_DOMAIN_XML_LIVE)
+        disks = list_vm_disks(dom)
         conn.close()
-        
-        import xml.etree.ElementTree as ET
-        root = ET.fromstring(xml_desc)
-        
-        disks = []
-        for disk in root.findall(".//disk[@type='file']"):
-            target = disk.find("target")
-            source = disk.find("source")
-            if target is not None and source is not None:
-                disk_info = {
-                    "target_dev": target.get("dev"),
-                    "source_file": source.get("file"),
-                    "bus": target.get("bus")
-                }
-                disks.append(disk_info)
-                logger.debug(f"Found disk: {disk_info}")
         
         logger.info(f"Successfully listed {len(disks)} disks for VM '{vm_name}'")
         return {"vm_name": vm_name, "disks": disks}
