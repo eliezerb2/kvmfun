@@ -1,6 +1,20 @@
 {
     "version": "2.0.0",
     "tasks": [
+        { "label": "Uninstall",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/.vscode/uninstall-service.ps1",
+                "-ServiceName", "kvmfun",
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
         { "label": "Install",
             "type": "shell",
             "command": "powershell",
