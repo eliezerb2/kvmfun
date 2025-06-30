@@ -1,6 +1,23 @@
 {
     "version": "2.0.0",
     "tasks": [
+        { "label": "Install",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/.vscode/deploy-and-tail.ps1",
+                "-ReleaseName", "kvmfun",
+                "-ChartPath", "./helm/kvmfun",
+                "-ValuesFile", "./helm/kvmfun/values.yaml",
+                "-AppLabel", "kvmfun"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": false
+            },
+            "problemMatcher": []
+        },
         {
             "label": "Build Docker Image",
             "type": "shell",

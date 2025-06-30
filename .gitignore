@@ -43,3 +43,6 @@ htmlcov/
 # Logs
 *.log
 build-deploy.log
+
+# Helm
+.debug/*-debug.yaml
