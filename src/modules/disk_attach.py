@@ -5,7 +5,7 @@ import logging
 import time
 from typing import Optional
 from src.config import config
-from src.modules.libvirt_utils import get_libvirt_domain, parse_domain_xml, get_next_available_virtio_dev, NAMESPACES, LIBVIRT_DOMAIN_NAMESPACE
+from src.modules.libvirt_utils import parse_domain_xml, get_next_available_virtio_dev, NAMESPACES, LIBVIRT_DOMAIN_NAMESPACE
 from src.modules.validation_utils import validate_qcow2_path
 
 logger = logging.getLogger(__name__)

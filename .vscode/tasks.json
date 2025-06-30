@@ -41,7 +41,7 @@
                 "-File", "${workspaceFolder}/.vscode/build-docker.ps1",
                 "-dockerfilePath", "./docker",
                 "-imageTag", "kvmfun",
-                "-NoCache"
+                // "-NoCache"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
