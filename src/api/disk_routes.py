@@ -6,6 +6,7 @@ from src.modules.disk_attach import get_next_available_virtio_dev, attach_disk
 from src.modules.disk_detach import detach_disk
 from src.modules.libvirt_utils import get_connection_dependency
 from src.modules.validation_utils import validate_vm_name, validate_target_device, validate_qcow2_path
+from src.modules.exceptions import DiskNotFound
 from src.modules.disk_utils import list_vm_disks
 from src.config import config
 
@@ -102,19 +103,6 @@ async def attach_disk_endpoint(request: AttachDiskRequest, conn: libvirt.virConn
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
                               detail="Failed to attach disk")
             
-    except libvirt.libvirtError as e:
-        error_msg = str(e)
-        if "Domain not found" in error_msg:
-            logger.error(f"VM not found: {request.vm_name}")
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                              detail=f"VM '{request.vm_name}' not found")
-        elif "already in use" in error_msg or "Target device" in error_msg:
-            logger.error(f"Device conflict for {request.target_dev}: {error_msg}")
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, 
-                              detail=f"Target device '{request.target_dev}' is already in use")
-        else:
-            logger.error(f"Libvirt error during disk attach: {error_msg}")
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=error_msg)
     except ValueError as e:
         logger.error(f"Validation error during disk attach: {e}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -163,14 +151,11 @@ async def detach_disk_endpoint(request: DetachDiskRequest, conn: libvirt.virConn
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
                               detail="Failed to detach disk")
             
-    except ValueError as e:
-        error_msg = str(e)
-        if "not found" in error_msg:
-            logger.error(f"VM or disk not found: {error_msg}")
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error_msg)
-        else:
-            logger.error(f"Validation error during disk detach: {error_msg}")
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error_msg)
+    except DiskNotFound as e:
+        logger.error(f"Disk not found during detach: {e}")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    except ValueError as e: # Catches other validation errors
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except Exception as e:
         logger.error(f"Unexpected error during disk detach: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -219,15 +204,6 @@ async def list_disks(vm_name: str, conn: libvirt.virConnect = Depends(get_connec
         logger.info(f"Successfully listed {len(disks)} disks for VM '{vm_name}'")
         return {"vm_name": vm_name, "disks": disks}
         
-    except libvirt.libvirtError as e:
-        error_msg = str(e)
-        if "Domain not found" in error_msg:
-            logger.error(f"VM not found: {vm_name}")
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, 
-                              detail=f"VM '{vm_name}' not found")
-        else:
-            logger.error(f"Libvirt error during disk list: {error_msg}")
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=error_msg)
     except Exception as e:
         logger.error(f"Unexpected error during disk list for VM '{vm_name}': {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

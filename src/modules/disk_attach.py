@@ -106,9 +106,6 @@ def attach_disk(dom: libvirt.virDomain, qcow2_path: str, target_dev: str) -> boo
     except (ValueError, RuntimeError) as e:
         logger.error(f"Disk attachment failed for VM '{vm_name}': {e}")
         raise
-    except libvirt.libvirtError as e:
-        logger.error(f"Libvirt error during disk attachment for VM '{vm_name}': {e}")
-        raise
     except Exception as e:
         logger.error(f"Unexpected error during disk attachment for VM '{vm_name}': {e}")
         return False
