@@ -9,53 +9,6 @@ logger = logging.getLogger(__name__)
 LIBVIRT_DOMAIN_NAMESPACE = "http://libvirt.org/schemas/domain/1.0"
 NAMESPACES = {'lib': LIBVIRT_DOMAIN_NAMESPACE}
 
-def get_libvirt_domain(vm_name: str) -> Tuple[libvirt.virConnect, libvirt.virDomain]:
-    """
-    Establish libvirt connection and lookup domain.
-    
-    Creates a connection to the libvirt daemon and retrieves the specified
-    virtual machine domain object.
-    
-    Args:
-        vm_name: Name of the virtual machine to lookup
-        
-    Returns:
-        Tuple[libvirt.virConnect, libvirt.virDomain]: Connection and domain objects
-        
-    Raises:
-        RuntimeError: If connection fails
-        libvirt.libvirtError: If domain not found or other libvirt errors
-        
-    Note:
-        Caller is responsible for closing the connection when done.
-    """
-    logger.info(f"Establishing libvirt connection for VM '{vm_name}' using URI: {config.LIBVIRT_URI}")
-    
-    conn = None
-    try:
-        conn = libvirt.open(config.LIBVIRT_URI)
-        if conn is None:
-            error_msg = f'Failed to open connection to {config.LIBVIRT_URI}'
-            logger.error(error_msg)
-            raise RuntimeError(error_msg)
-        
-        logger.debug(f"Libvirt connection established successfully")
-        
-        dom = conn.lookupByName(vm_name)
-        logger.info(f"Successfully found domain '{vm_name}' (ID: {dom.ID()}, State: {dom.state()})")
-        return conn, dom
-        
-    except libvirt.libvirtError as e:
-        if conn:
-            conn.close()
-        logger.error(f"Failed to find domain '{vm_name}': {e}")
-        raise
-    except Exception as e:
-        if conn:
-            conn.close()
-        logger.error(f"Unexpected error connecting to libvirt: {e}")
-        raise RuntimeError(f"Unexpected error: {e}")
-
 def get_libvirt_connection() -> libvirt.virConnect:
     """
     Establish libvirt connection.
@@ -86,6 +39,28 @@ def get_libvirt_connection() -> libvirt.virConnect:
     except Exception as e:
         logger.error(f"Unexpected error connecting to libvirt: {e}")
         raise RuntimeError(f"Unexpected error: {e}")
+
+def get_connection_dependency() -> libvirt.virConnect:
+    """
+    FastAPI dependency to manage the libvirt connection lifecycle.
+
+    Yields:
+        libvirt.virConnect: An active libvirt connection object.
+    
+    Note:
+        This generator function establishes a connection and yields it to the
+        request handler. The 'finally' block ensures the connection is
+        always closed, even if errors occur during the request.
+    """
+    logger.debug("Dependency: acquiring libvirt connection.")
+    conn = None
+    try:
+        conn = get_libvirt_connection()
+        yield conn
+    finally:
+        if conn:
+            conn.close()
+            logger.debug("Dependency: libvirt connection closed.")
 
 def parse_domain_xml(dom: libvirt.virDomain, live: bool = True) -> ET.Element:
     """

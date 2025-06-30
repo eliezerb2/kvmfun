@@ -1,12 +1,10 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, validator
 import libvirt
 import logging
-import re
-import os
 from src.modules.disk_attach import get_next_available_virtio_dev, attach_disk
 from src.modules.disk_detach import detach_disk
-from src.modules.libvirt_utils import get_libvirt_domain, get_libvirt_connection
+from src.modules.libvirt_utils import get_connection_dependency
 from src.modules.validation_utils import validate_vm_name, validate_target_device, validate_qcow2_path
 from src.modules.disk_utils import list_vm_disks
 from src.config import config
@@ -57,7 +55,7 @@ class DetachDiskRequest(BaseModel):
                 409: {"description": "Device already in use or disk already attached"},
                 500: {"description": "Internal server error"}
             })
-async def attach_disk_endpoint(request: AttachDiskRequest):
+async def attach_disk_endpoint(request: AttachDiskRequest, conn: libvirt.virConnect = Depends(get_connection_dependency)):
     """
     Attach a QCOW2 disk to a running virtual machine.
     
@@ -87,7 +85,7 @@ async def attach_disk_endpoint(request: AttachDiskRequest):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
     try:
-        conn, dom = get_libvirt_domain(request.vm_name)
+        dom = conn.lookupByName(request.vm_name)
         logger.info(f"Successfully connected to VM '{request.vm_name}'")
         
         if not request.target_dev:
@@ -95,7 +93,6 @@ async def attach_disk_endpoint(request: AttachDiskRequest):
             logger.info(f"Auto-assigned target device: {request.target_dev}")
         
         success = attach_disk(dom, request.qcow2_path, request.target_dev)
-        conn.close()
         
         if success:
             logger.info(f"Successfully attached disk '{request.qcow2_path}' as '{request.target_dev}' to VM '{request.vm_name}'")
@@ -134,7 +131,7 @@ async def attach_disk_endpoint(request: AttachDiskRequest):
                 404: {"description": "VM or disk not found"},
                 500: {"description": "Internal server error"}
             })
-async def detach_disk_endpoint(request: DetachDiskRequest):
+async def detach_disk_endpoint(request: DetachDiskRequest, conn: libvirt.virConnect = Depends(get_connection_dependency)):
     """
     Detach a disk from a running virtual machine.
     
@@ -156,10 +153,7 @@ async def detach_disk_endpoint(request: DetachDiskRequest):
     logger.info(f"Disk detach request - VM: {request.vm_name}, Target: {request.target_dev}")
     
     try:
-        conn = get_libvirt_connection()
-        logger.info(f"Successfully connected to libvirt for VM '{request.vm_name}'")
         success = detach_disk(conn, request.vm_name, request.target_dev)
-        conn.close()
         
         if success:
             logger.info(f"Successfully detached disk '{request.target_dev}' from VM '{request.vm_name}'")
@@ -190,7 +184,7 @@ async def detach_disk_endpoint(request: DetachDiskRequest):
                404: {"description": "VM not found"},
                500: {"description": "Internal server error"}
            })
-async def list_disks(vm_name: str):
+async def list_disks(vm_name: str, conn: libvirt.virConnect = Depends(get_connection_dependency)):
     """
     List all disks attached to a virtual machine.
     
@@ -217,11 +211,10 @@ async def list_disks(vm_name: str):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
     try:
-        conn, dom = get_libvirt_domain(vm_name)
+        dom = conn.lookupByName(vm_name)
         logger.info(f"Successfully connected to VM '{vm_name}'")
         
         disks = list_vm_disks(dom)
-        conn.close()
         
         logger.info(f"Successfully listed {len(disks)} disks for VM '{vm_name}'")
         return {"vm_name": vm_name, "disks": disks}
