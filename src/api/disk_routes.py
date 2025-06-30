@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 import libvirt
 import logging
 from src.modules.disk_attach import get_next_available_virtio_dev, attach_disk
@@ -19,18 +19,21 @@ class AttachDiskRequest(BaseModel):
     qcow2_path: str = Field(..., description="Path to the QCOW2 disk image", min_length=1)
     target_dev: str = Field(None, description="Target device name (auto-assigned if not provided)")
     
-    @validator('vm_name')
-    def validate_vm_name_field(cls, v):
+    @field_validator('vm_name')
+    @classmethod
+    def validate_vm_name_field(cls, v: str) -> str:
         return validate_vm_name(v)
     
-    @validator('qcow2_path')
-    def validate_qcow2_path_field(cls, v):
+    @field_validator('qcow2_path')
+    @classmethod
+    def validate_qcow2_path_field(cls, v: str) -> str:
         if not v.endswith('.qcow2'):
             raise ValueError('Disk path must end with .qcow2')
         return v
     
-    @validator('target_dev')
-    def validate_target_dev_field(cls, v):
+    @field_validator('target_dev')
+    @classmethod
+    def validate_target_dev_field(cls, v: str) -> str:
         return validate_target_device(v)
 
 class DetachDiskRequest(BaseModel):
@@ -38,12 +41,14 @@ class DetachDiskRequest(BaseModel):
     vm_name: str = Field(..., description="Name of the virtual machine", min_length=1, max_length=255)
     target_dev: str = Field(..., description="Target device name to detach", min_length=1)
     
-    @validator('vm_name')
-    def validate_vm_name_field(cls, v):
+    @field_validator('vm_name')
+    @classmethod
+    def validate_vm_name_field(cls, v: str) -> str:
         return validate_vm_name(v)
     
-    @validator('target_dev')
-    def validate_target_dev_field(cls, v):
+    @field_validator('target_dev')
+    @classmethod
+    def validate_target_dev_field(cls, v: str) -> str:
         return validate_target_device(v)
 
 @router.post("/attach", 
@@ -106,9 +111,6 @@ async def attach_disk_endpoint(request: AttachDiskRequest, conn: libvirt.virConn
     except ValueError as e:
         logger.error(f"Validation error during disk attach: {e}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error during disk attach: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.post("/detach", 
             summary="Detach disk from VM",
@@ -156,9 +158,6 @@ async def detach_disk_endpoint(request: DetachDiskRequest, conn: libvirt.virConn
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except ValueError as e: # Catches other validation errors
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    except Exception as e:
-        logger.error(f"Unexpected error during disk detach: {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/list/{vm_name}", 
            summary="List VM disks",
@@ -195,15 +194,10 @@ async def list_disks(vm_name: str, conn: libvirt.virConnect = Depends(get_connec
         logger.error(f"Invalid VM name: {e}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
-    try:
-        dom = conn.lookupByName(vm_name)
-        logger.info(f"Successfully connected to VM '{vm_name}'")
-        
-        disks = list_vm_disks(dom)
-        
-        logger.info(f"Successfully listed {len(disks)} disks for VM '{vm_name}'")
-        return {"vm_name": vm_name, "disks": disks}
-        
-    except Exception as e:
-        logger.error(f"Unexpected error during disk list for VM '{vm_name}': {e}")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    dom = conn.lookupByName(vm_name)
+    logger.info(f"Successfully connected to VM '{vm_name}'")
+    
+    disks = list_vm_disks(dom)
+    
+    logger.info(f"Successfully listed {len(disks)} disks for VM '{vm_name}'")
+    return {"vm_name": vm_name, "disks": disks}

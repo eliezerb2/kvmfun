@@ -48,9 +48,10 @@ def test_health_endpoint(client_with_mocks):
     assert "status" in response.json()
     assert "version" in response.json()
 
+@patch('src.api.disk_routes.validate_qcow2_path')
 @patch('src.api.disk_routes.attach_disk')
 @patch('src.api.disk_routes.get_next_available_virtio_dev')
-def test_attach_disk_success(mock_get_dev, mock_attach, client_with_mocks):
+def test_attach_disk_success(mock_get_dev, mock_attach, mock_validate_path, client_with_mocks):
     """Test successful disk attachment."""
     client, mock_conn, mock_dom = client_with_mocks
     
@@ -66,7 +67,8 @@ def test_attach_disk_success(mock_get_dev, mock_attach, client_with_mocks):
     mock_conn.lookupByName.assert_called_once_with("test_vm")
     mock_attach.assert_called_once_with(mock_dom, "/path/to/disk.qcow2", "vdb")
 
-def test_attach_disk_vm_not_found(client_with_mocks):
+@patch('src.api.disk_routes.validate_qcow2_path')
+def test_attach_disk_vm_not_found(mock_validate_path, client_with_mocks):
     """Test VM not found scenario during attachment."""
     client, mock_conn, _ = client_with_mocks
     

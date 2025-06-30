@@ -2,8 +2,8 @@
 
 # Parameters
 param(
-    [string]$envFilePath,  # Path to the .env file
-    [string]$dockerfilePath,  # Path to the Dockerfile directory
+    [string]$envFilePath,     # Path to the .env file
+    [string]$Dockerfile,      # Full path to the Dockerfile
     [string]$imageTag,  # Docker image tag
     [switch]$NoCache  # Optional: build with --no-cache
 )
@@ -23,18 +23,18 @@ $buildArgsStr = $buildArgs -join ' '
 # Build the Docker image
 # Use repository root as build context and specify Dockerfile with -f
 $noCacheArg = if ($NoCache) { '--no-cache' } else { '' }
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$dockerFile = Join-Path $dockerfilePath "Dockerfile"
-$modulePath = Split-Path -Leaf (Split-Path -Parent $dockerfilePath)
+# Resolve the repository root relative to the script's location. This is more robust.
+$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$modulePath = Split-Path -Leaf (Split-Path -Parent $Dockerfile)
 
 Write-Host "Building Docker image with tag: $imageTag"
-Write-Host "Using Dockerfile: $dockerFile"
+Write-Host "Using Dockerfile: $Dockerfile"
 Write-Host "Build arguments: $buildArgsStr"
 Write-Host "Using .env file: $envFilePath"
 Write-Host "Build context: $repoRoot"
 Write-Host "Module path: $modulePath"
 Write-Host "Cache: $(if ($NoCache) { 'disabled' } else { 'enabled' })"
 
-$buildCommand = "docker build $noCacheArg $buildArgsStr --build-arg MODULE_PATH=$modulePath -t $imageTag -f `"$dockerFile`" `"$repoRoot`""
+$buildCommand = "docker build $noCacheArg $buildArgsStr --build-arg MODULE_PATH=$modulePath -t $imageTag -f `"$Dockerfile`" `"$repoRoot`""
 Write-Host "Executing: $buildCommand"
 Invoke-Expression $buildCommand

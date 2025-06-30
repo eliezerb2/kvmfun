@@ -33,14 +33,14 @@
             "problemMatcher": []
         },
         {
-            "label": "Build Docker Image",
+            "label": "Build App Image",
             "type": "shell",
             "command": "powershell.exe",
             "args": [
                 "-ExecutionPolicy", "Bypass",
                 "-File", "${workspaceFolder}/.vscode/build-docker.ps1",
-                "-dockerfilePath", "./docker",
-                "-imageTag", "kvmfun",
+                "-Dockerfile", "${workspaceFolder}/docker/Dockerfile",
+                "-imageTag", "kvmfun:latest",
                 // "-NoCache"
             ],
             "options": {
@@ -58,6 +58,52 @@
                 "panel": "shared",
                 "showReuseMessage": true,
                 "clear": false
+            }
+        },
+        {
+            "label": "Build Test Image",
+            "type": "shell",
+            "command": "powershell.exe",
+            "args": [
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/.vscode/build-docker.ps1",
+                "-Dockerfile", "${workspaceFolder}/docker/Dockerfile.test",
+                "-imageTag", "kvmfun-test:latest",
+                // "-NoCache"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "label": "Run Helm Tests",
+            "type": "shell",
+            "command": "helm",
+            "args": [
+                "test",
+                "kvmfun",
+                "--logs"
+            ],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "clear": true
             }
         }
     ],

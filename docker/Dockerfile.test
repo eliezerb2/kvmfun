@@ -1,0 +1,30 @@
+# Dockerfile for running tests in an isolated environment
+FROM python:3.11.7-slim
+
+WORKDIR /app
+
+# Install system dependencies required for building libvirt-python and for testing.
+# These are the same as the 'builder' stage in the main Dockerfile.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libvirt-dev \
+    pkg-config \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy and install Python dependencies.
+COPY requirements.txt .
+# Install pytest in addition to application requirements.
+RUN pip install --no-cache-dir -r requirements.txt && \
+    # httpx is an optional dependency required by fastapi.testclient
+    pip install --no-cache-dir pytest pytest-cov "httpx<0.24.0"
+
+# Add the working directory to PYTHONPATH so that imports like 'from src.main' work correctly.
+ENV PYTHONPATH=/app
+
+# Copy source code and tests into the container.
+COPY src/ ./src/
+COPY tests/ ./tests/
+
+# Set the default command to run tests with verbose output.
+CMD ["pytest", "-v"]
