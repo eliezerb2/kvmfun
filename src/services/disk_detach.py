@@ -3,8 +3,8 @@ import xml.etree.ElementTree as ET
 import time
 import logging
 from typing import Optional
-from src.config import config
-from src.modules.libvirt_utils import get_libvirt_connection, parse_domain_xml
+from src.utils.config import config
+from src.utils.libvirt_utils import get_libvirt_connection, parse_domain_xml
 
 logger = logging.getLogger(__name__)
 

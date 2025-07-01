@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field, field_validator
 import libvirt
 import logging
-from src.modules.disk_attach import get_next_available_virtio_dev, attach_disk
-from src.modules.disk_detach import detach_disk
-from src.modules.libvirt_utils import get_connection_dependency
-from src.modules.validation_utils import validate_vm_name, validate_target_device, validate_qcow2_path
-from src.modules.exceptions import DiskNotFound
-from src.modules.disk_utils import list_vm_disks
-from src.config import config
+from src.services.disk_attach import get_next_available_virtio_dev, attach_disk
+from src.services.disk_detach import detach_disk
+from src.utils.libvirt_utils import get_connection_dependency
+from src.utils.validation_utils import validate_vm_name, validate_target_device, validate_qcow2_path
+from src.utils.exceptions import DiskNotFound
+from src.services.disk_utils import list_vm_disks
+from src.utils.config import config
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix=config.DISK_ROUTER_PREFIX, tags=["disk"])

@@ -2,7 +2,7 @@ import libvirt
 import xml.etree.ElementTree as ET
 import logging
 from typing import Tuple
-from src.config import config
+from src.utils.config import config
 
 logger = logging.getLogger(__name__)
 

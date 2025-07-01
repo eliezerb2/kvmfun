@@ -10,7 +10,7 @@ kvmfun/
 │   ├── main.py              # FastAPI application entry point
 │   ├── api/
 │   │   └── disk_routes.py   # API endpoints for disk operations
-│   └── modules/
+│   └── services/
 │       ├── disk_attach.py   # Disk attachment functionality
 │       └── disk_detach.py   # Disk detachment functionality
 ├── helm/
@@ -33,6 +33,7 @@ kvmfun/
 ## API Examples
 
 ### Attach Disk
+
 ```bash
 curl -X POST "http://localhost:8000/api/v1/disk/attach" \
   -H "Content-Type: application/json" \
@@ -43,6 +44,7 @@ curl -X POST "http://localhost:8000/api/v1/disk/attach" \
 ```
 
 **Response:**
+
 ```json
 {
   "status": "success",
@@ -51,6 +53,7 @@ curl -X POST "http://localhost:8000/api/v1/disk/attach" \
 ```
 
 ### Detach Disk
+
 ```bash
 curl -X POST "http://localhost:8000/api/v1/disk/detach" \
   -H "Content-Type: application/json" \
@@ -61,6 +64,7 @@ curl -X POST "http://localhost:8000/api/v1/disk/detach" \
 ```
 
 **Response:**
+
 ```json
 {
   "status": "success"
@@ -68,11 +72,13 @@ curl -X POST "http://localhost:8000/api/v1/disk/detach" \
 ```
 
 ### List Disks
+
 ```bash
 curl "http://localhost:8000/api/v1/disk/list/my_ubuntu_vm"
 ```
 
 **Response:**
+
 ```json
 {
   "vm_name": "my_ubuntu_vm",
@@ -94,17 +100,20 @@ curl "http://localhost:8000/api/v1/disk/list/my_ubuntu_vm"
 ## Deployment
 
 ### Prerequisites
+
 - Rancher Desktop with Kubernetes enabled
 - Docker
 - Helm
 - Access to libvirt/KVM host
 
 ### Build and Deploy
+
 ```powershell
 .\.vscode\build-and-deploy.ps1 -ImageTag "v1.0" -Namespace "kvmfun"
 ```
 
 ### Manual Steps
+
 ```powershell
 # Build image
 docker build -t kvmfun:latest -f docker/Dockerfile .
@@ -120,6 +129,7 @@ kubectl get svc
 ## Usage
 
 Access the API at `http://localhost:8000` (after port-forwarding):
+
 ```powershell
 kubectl port-forward svc/kvmfun 8000:80
 ```
@@ -129,16 +139,19 @@ API documentation available at `http://localhost:8000/docs`
 ## Testing
 
 ### Run Unit Tests
+
 ```powershell
 python -m pytest tests/ -v
 ```
 
 ### Run Integration Tests
+
 ```powershell
 python -m pytest tests/integration/ -v
 ```
 
 ### Test Coverage
+
 ```powershell
 python -m pytest --cov=src tests/
 ```
@@ -154,27 +167,34 @@ python -m pytest --cov=src tests/
 ### Common Issues
 
 **1. VM Not Found (404)**
+
 ```json
 {"detail": "VM 'my_vm' not found"}
 ```
+
 - Verify VM name exists: `virsh list --all`
 - Check libvirt connection
 
 **2. Disk Already Attached**
+
 ```json
 {"detail": "Target device 'vdb' is already in use"}
 ```
+
 - List current disks: `GET /api/v1/disk/list/{vm_name}`
 - Use different target device or detach existing disk
 
 **3. Permission Denied**
+
 ```json
 {"detail": "Failed to open connection to qemu:///system"}
 ```
+
 - Ensure libvirt permissions
 - Check if running in privileged container
 
 **4. Container Won't Start**
+
 - Check logs: `kubectl logs deployment/kvmfun`
 - Verify libvirt dependencies in container
 - Check resource limits

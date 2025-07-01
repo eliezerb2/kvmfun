@@ -1,8 +1,8 @@
 import pytest
 from unittest.mock import Mock, patch
-from src.modules.disk_detach import get_disk_xml_for_target_dev, poll_for_disk_removal, detach_disk
+from src.services.disk_detach import get_disk_xml_for_target_dev, poll_for_disk_removal, detach_disk
 
-@patch('src.modules.disk_detach.ET.fromstring')
+@patch('app.services.disk_detach.ET.fromstring')
 def test_get_disk_xml_for_target_dev_success(mock_fromstring):
     """Test successful disk XML retrieval."""
     mock_dom = Mock()
@@ -22,7 +22,7 @@ def test_get_disk_xml_for_target_dev_success(mock_fromstring):
     mock_root.findall.return_value = [mock_disk]
     mock_fromstring.return_value = mock_root
     
-    with patch('src.modules.disk_detach.ET.tostring', return_value='<disk></disk>'):
+    with patch('app.services.disk_detach.ET.tostring', return_value='<disk></disk>'):
         result = get_disk_xml_for_target_dev(mock_dom, 'vdb')
         assert result == '<disk></disk>'
 
@@ -32,7 +32,7 @@ def test_get_disk_xml_for_target_dev_not_found():
     mock_dom.XMLDesc.return_value = '<domain></domain>'
     mock_dom.name.return_value = 'test_vm'
     
-    with patch('src.modules.disk_detach.ET.fromstring') as mock_fromstring:
+    with patch('app.services.disk_detach.ET.fromstring') as mock_fromstring:
         mock_root = Mock()
         mock_root.findall.return_value = []
         mock_fromstring.return_value = mock_root
@@ -40,8 +40,8 @@ def test_get_disk_xml_for_target_dev_not_found():
         with pytest.raises(ValueError, match="Disk with target 'vdb' not found"):
             get_disk_xml_for_target_dev(mock_dom, 'vdb')
 
-@patch('src.modules.disk_detach.time.sleep')
-@patch('src.modules.disk_detach.ET.fromstring')
+@patch('app.services.disk_detach.time.sleep')
+@patch('app.services.disk_detach.ET.fromstring')
 def test_poll_for_disk_removal_success(mock_fromstring, mock_sleep):
     """Test successful disk removal polling."""
     mock_dom = Mock()

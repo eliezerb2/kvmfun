@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as ET
 import logging
 from typing import List, Dict, Any
-from src.modules.libvirt_utils import parse_domain_xml, NAMESPACES
+from src.utils.libvirt_utils import parse_domain_xml, NAMESPACES
 import libvirt
 
 logger = logging.getLogger(__name__)

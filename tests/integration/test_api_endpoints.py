@@ -4,8 +4,8 @@ from unittest.mock import patch, Mock
 import libvirt
 
 from src.main import app
-from src.modules.libvirt_utils import get_connection_dependency
-from src.modules.exceptions import DiskNotFound
+from src.utils.libvirt_utils import get_connection_dependency
+from src.utils.exceptions import DiskNotFound
 
 # Use a fixture to set up the test client and dependency overrides for each test run.
 # This ensures a clean testing environment for each test case.

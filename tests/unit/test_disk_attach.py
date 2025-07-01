@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from src.modules.disk_attach import _letters_to_int, _int_to_letters, get_next_available_virtio_dev
+from src.services.disk_attach import _letters_to_int, _int_to_letters, get_next_available_virtio_dev
 
 def test_letters_to_int():
     """Test letter to integer conversion."""
@@ -16,7 +16,7 @@ def test_int_to_letters():
     assert _int_to_letters(25) == 'z'
     assert _int_to_letters(26) == 'aa'
 
-@patch('src.modules.disk_attach.ET.fromstring')
+@patch('app.services.disk_attach.ET.fromstring')
 def test_get_next_available_virtio_dev(mock_fromstring):
     """Test finding next available device."""
     mock_dom = Mock()
