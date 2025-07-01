@@ -120,7 +120,7 @@ env:
   
   # Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
   - name: LOG_LEVEL
-    value: "INFO"
+    value: "DEBUG"
   
   # Python logging format string for log messages
   - name: LOG_FORMAT
