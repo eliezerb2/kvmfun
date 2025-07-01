@@ -134,6 +134,10 @@ env:
   - name: API_PREFIX
     value: "/api/v1"
   
+  # Prefix for VM management endpoints within API (e.g., /vm/create)
+  - name: VM_ROUTER_PREFIX
+    value: "/vm"
+
   # Prefix for disk management endpoints within API (e.g., /disk/attach)
   - name: DISK_ROUTER_PREFIX
     value: "/disk"

@@ -4,26 +4,29 @@ import libvirt
 import logging
 from src.services.disk_attach import get_next_available_virtio_dev, attach_disk
 from src.services.disk_detach import detach_disk
+from src.utils.constants import COMMON_API_RESPONSES
 from src.utils.libvirt_utils import get_connection_dependency
 from src.utils.validation_utils import validate_vm_name, validate_target_device, validate_qcow2_path
 from src.utils.exceptions import DiskNotFound
 from src.services.disk_utils import list_vm_disks
 from src.utils.config import config
 from src.schemas.attach_disk_request import AttachDiskRequest
-from src.schemas.detach_disk_request import DetachDiskRequest
+from src.schemas.base_schemas import BaseDiskRequest
 
 logger = logging.getLogger(__name__)
-router = APIRouter(prefix=config.DISK_ROUTER_PREFIX, tags=["disk"])
+router = APIRouter(
+    prefix=config.DISK_ROUTER_PREFIX, 
+    tags=["disk"],
+    responses={
+        **COMMON_API_RESPONSES,
+        }
+    )
 
 @router.post("/attach", 
             summary="Attach disk to VM",
             description="Attach a QCOW2 disk to a running virtual machine with automatic device assignment",
             responses={
-                200: {"description": "Disk successfully attached"},
-                400: {"description": "Invalid request parameters"},
-                404: {"description": "VM not found"},
                 409: {"description": "Device already in use or disk already attached"},
-                500: {"description": "Internal server error"}
             })
 async def attach_disk_endpoint(request: AttachDiskRequest, conn: libvirt.virConnect = Depends(get_connection_dependency)):
     """
@@ -72,13 +75,8 @@ async def attach_disk_endpoint(request: AttachDiskRequest, conn: libvirt.virConn
 @router.post("/detach", 
             summary="Detach disk from VM",
             description="Detach a disk from a running virtual machine by target device name",
-            responses={
-                200: {"description": "Disk successfully detached"},
-                400: {"description": "Invalid request parameters"},
-                404: {"description": "VM or disk not found"},
-                500: {"description": "Internal server error"}
-            })
-async def detach_disk_endpoint(request: DetachDiskRequest, conn: libvirt.virConnect = Depends(get_connection_dependency)):
+            )
+async def detach_disk_endpoint(request: BaseDiskRequest, conn: libvirt.virConnect = Depends(get_connection_dependency)):
     """
     Detach a disk from a running virtual machine.
     
@@ -86,7 +84,7 @@ async def detach_disk_endpoint(request: DetachDiskRequest, conn: libvirt.virConn
     the target device name.
     
     Args:
-        request: DetachDiskRequest containing:
+        request: BaseDiskRequest containing:
             - vm_name: Name of the target VM (alphanumeric, hyphens, underscores only)
             - target_dev: Device name to detach (format: vd[a-z]+)
     
@@ -115,46 +113,3 @@ async def detach_disk_endpoint(request: DetachDiskRequest, conn: libvirt.virConn
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except ValueError as e: # Catches other validation errors
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-
-@router.get("/list/{vm_name}", 
-           summary="List VM disks",
-           description="List all file-backed disks attached to a virtual machine",
-           responses={
-               200: {"description": "List of disks successfully retrieved"},
-               400: {"description": "Invalid VM name format"},
-               404: {"description": "VM not found"},
-               500: {"description": "Internal server error"}
-           })
-async def list_disks(vm_name: str, conn: libvirt.virConnect = Depends(get_connection_dependency)):
-    """
-    List all disks attached to a virtual machine.
-    
-    This endpoint retrieves information about all file-backed disks currently
-    attached to the specified virtual machine.
-    
-    Args:
-        vm_name: Name of the virtual machine (alphanumeric, hyphens, underscores only)
-    
-    Returns:
-        dict: VM name and list of attached disks with their properties
-        
-    Raises:
-        HTTPException: 400 for invalid VM name, 404 for VM not found, 
-                      500 for server errors
-    """
-    logger.info(f"Disk list request for VM: {vm_name}")
-    
-    # Validate VM name format
-    try:
-        validate_vm_name(vm_name)
-    except ValueError as e:
-        logger.error(f"Invalid VM name: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    
-    dom = conn.lookupByName(vm_name)
-    logger.info(f"Successfully connected to VM '{vm_name}'")
-    
-    disks = list_vm_disks(dom)
-    
-    logger.info(f"Successfully listed {len(disks)} disks for VM '{vm_name}'")
-    return {"vm_name": vm_name, "disks": disks}

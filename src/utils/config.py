@@ -34,6 +34,7 @@ class Config:
     
     # API configuration
     API_PREFIX: str = os.getenv("API_PREFIX", "/api/v1")
+    VM_ROUTER_PREFIX: str = os.getenv("VM_ROUTER_PREFIX", "/vm")
     DISK_ROUTER_PREFIX: str = os.getenv("DISK_ROUTER_PREFIX", "/disk")
 
 
