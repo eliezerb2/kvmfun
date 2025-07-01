@@ -7,14 +7,18 @@ from src.main import app
 from src.utils.libvirt_utils import get_connection_dependency
 from src.utils.exceptions import DiskNotFound
 
-# Use a fixture to set up the test client and dependency overrides for each test run.
-# This ensures a clean testing environment for each test case.
+# Ensure libvirt.VIR_DOMAIN_XML_LIVE exists for tests using mocks
+if not hasattr(libvirt, "VIR_DOMAIN_XML_LIVE"):
+    libvirt.VIR_DOMAIN_XML_LIVE = 1
+
 @pytest.fixture
 def mock_libvirt_connection():
     """Fixture to provide mocked libvirt connection and domain."""
     mock_conn = Mock(spec=libvirt.virConnect)
     mock_dom = Mock(spec=libvirt.virDomain)
     mock_conn.lookupByName.return_value = mock_dom
+    # Provide a minimal valid XML for the domain
+    mock_dom.XMLDesc.return_value = "<domain><devices></devices></domain>"
     return mock_conn, mock_dom
 
 @pytest.fixture
@@ -48,16 +52,14 @@ def test_health_endpoint(client_with_mocks):
     assert "status" in response.json()
     assert "version" in response.json()
 
-@patch('src.api.disk_routes.validate_qcow2_path')
-@patch('src.api.disk_routes.attach_disk')
-@patch('src.api.disk_routes.get_next_available_virtio_dev')
-def test_attach_disk_success(mock_get_dev, mock_attach, mock_validate_path, client_with_mocks):
-    """Test successful disk attachment."""
+@patch('src.api.disk.attach_disk')
+@patch('src.api.disk.get_next_available_virtio_dev')
+def test_attach_disk_success(mock_get_dev, mock_attach, client_with_mocks):
+    """Test successful disk attachment with auto-assigned device."""
     client, mock_conn, mock_dom = client_with_mocks
-    
     mock_get_dev.return_value = 'vdb'
     mock_attach.return_value = True
-    
+
     response = client.post("/api/v1/disk/attach", json={
         "vm_name": "test_vm",
         "qcow2_path": "/path/to/disk.qcow2"
@@ -67,8 +69,7 @@ def test_attach_disk_success(mock_get_dev, mock_attach, mock_validate_path, clie
     mock_conn.lookupByName.assert_called_once_with("test_vm")
     mock_attach.assert_called_once_with(mock_dom, "/path/to/disk.qcow2", "vdb")
 
-@patch('src.api.disk_routes.validate_qcow2_path')
-def test_attach_disk_vm_not_found(mock_validate_path, client_with_mocks):
+def test_attach_disk_vm_not_found(client_with_mocks):
     """Test VM not found scenario during attachment."""
     client, mock_conn, _ = client_with_mocks
     
@@ -82,7 +83,19 @@ def test_attach_disk_vm_not_found(mock_validate_path, client_with_mocks):
     assert response.status_code == 404
     assert "The specified VM was not found" in response.json()["detail"]
 
-@patch('src.api.disk_routes.detach_disk')
+def test_attach_disk_invalid_vm_name_format(client_with_mocks):
+    """Test API response for an invalid VM name format which should trigger Pydantic validation."""
+    client, _, _ = client_with_mocks
+    response = client.post("/api/v1/disk/attach", json={
+        "vm_name": "invalid vm name with spaces",
+        "qcow2_path": "/path/to/disk.qcow2"
+    })
+    assert response.status_code == 422  # Unprocessable Entity for validation errors
+    details = response.json()["detail"]
+    assert isinstance(details, list) and len(details) > 0
+    assert "VM name must contain only alphanumeric characters" in details[0]["msg"]
+
+@patch('src.api.disk.detach_disk')
 def test_detach_disk_success(mock_detach, client_with_mocks):
     """Test successful disk detachment."""
     client, mock_conn, _ = client_with_mocks
@@ -96,7 +109,7 @@ def test_detach_disk_success(mock_detach, client_with_mocks):
     assert response.json() == {"status": "success"}
     mock_detach.assert_called_once_with(mock_conn, "test_vm", "vdb")
 
-@patch('src.api.disk_routes.detach_disk')
+@patch('src.api.disk.detach_disk')
 def test_detach_disk_disk_not_found(mock_detach, client_with_mocks):
     """Test disk not found scenario during detachment."""
     client, mock_conn, _ = client_with_mocks

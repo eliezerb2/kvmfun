@@ -9,47 +9,11 @@ from src.utils.validation_utils import validate_vm_name, validate_target_device,
 from src.utils.exceptions import DiskNotFound
 from src.services.disk_utils import list_vm_disks
 from src.utils.config import config
+from src.schemas.attach_disk_request import AttachDiskRequest
+from src.schemas.detach_disk_request import DetachDiskRequest
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix=config.DISK_ROUTER_PREFIX, tags=["disk"])
-
-class AttachDiskRequest(BaseModel):
-    """Request model for disk attachment."""
-    vm_name: str = Field(..., description="Name of the virtual machine", min_length=1, max_length=255)
-    qcow2_path: str = Field(..., description="Path to the QCOW2 disk image", min_length=1)
-    target_dev: str = Field(None, description="Target device name (auto-assigned if not provided)")
-    
-    @field_validator('vm_name')
-    @classmethod
-    def validate_vm_name_field(cls, v: str) -> str:
-        return validate_vm_name(v)
-    
-    @field_validator('qcow2_path')
-    @classmethod
-    def validate_qcow2_path_field(cls, v: str) -> str:
-        if not v.endswith('.qcow2'):
-            raise ValueError('Disk path must end with .qcow2')
-        return v
-    
-    @field_validator('target_dev')
-    @classmethod
-    def validate_target_dev_field(cls, v: str) -> str:
-        return validate_target_device(v)
-
-class DetachDiskRequest(BaseModel):
-    """Request model for disk detachment."""
-    vm_name: str = Field(..., description="Name of the virtual machine", min_length=1, max_length=255)
-    target_dev: str = Field(..., description="Target device name to detach", min_length=1)
-    
-    @field_validator('vm_name')
-    @classmethod
-    def validate_vm_name_field(cls, v: str) -> str:
-        return validate_vm_name(v)
-    
-    @field_validator('target_dev')
-    @classmethod
-    def validate_target_dev_field(cls, v: str) -> str:
-        return validate_target_device(v)
 
 @router.post("/attach", 
             summary="Attach disk to VM",
@@ -82,13 +46,6 @@ async def attach_disk_endpoint(request: AttachDiskRequest, conn: libvirt.virConn
                       409 for conflicts, 500 for server errors
     """
     logger.info(f"Disk attach request - VM: {request.vm_name}, Path: {request.qcow2_path}, Target: {request.target_dev}")
-    
-    # Validate request parameters
-    try:
-        validate_qcow2_path(request.qcow2_path)
-    except ValueError as e:
-        logger.error(f"Validation error: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     
     try:
         dom = conn.lookupByName(request.vm_name)

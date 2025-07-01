@@ -1,7 +1,7 @@
 import logging
 import libvirt
 from fastapi import FastAPI
-from src.api import disk_routes
+from src.api import disk
 from src.utils.config import config
 from src.utils.exception_handlers import libvirt_error_handler
 
@@ -21,7 +21,7 @@ app = FastAPI(
 # Register the custom exception handler for all libvirt errors
 app.add_exception_handler(libvirt.libvirtError, libvirt_error_handler)
 
-app.include_router(disk_routes.router, prefix=config.API_PREFIX)
+app.include_router(disk.router, prefix=config.API_PREFIX)
 
 @app.get("/health")
 async def health_check():
