@@ -3,7 +3,7 @@ import libvirt
 from fastapi import FastAPI
 from src.api import disk_routes
 from src.utils.config import config
-from src.api.exception_handlers import libvirt_error_handler
+from src.utils.exception_handlers import libvirt_error_handler
 
 # Configure logging
 logging.basicConfig(
