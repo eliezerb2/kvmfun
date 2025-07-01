@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response
 import libvirt
 import logging
 from src.schemas.create_vm_request import CreateVMRequest
+from src.services.disk_utils import list_vm_disks
 from src.utils.libvirt_utils import get_connection_dependency
 from src.utils.validation_utils import validate_vm_name
 from src.services.vm_create import create_vm
