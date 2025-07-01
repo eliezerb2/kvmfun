@@ -57,3 +57,27 @@ def create_vm(vm_name, memory_mb, vcpu_count, disk_path, network_name, conn) -> 
     if domain is None:
         raise Exception("Failed to define the VM domain")
     return domain.UUIDString()
+  
+def delete_vm(vm_name: str, conn: libvirt.virConnect) -> bool:
+    """
+    Delete a virtual machine by its name.
+    
+    Args:
+        vm_name (str): Name of the virtual machine to delete.
+        conn (libvirt.virConnect): Connection to the libvirt hypervisor.
+        
+    Returns:
+        bool: True if the VM was successfully deleted, False if not found.
+        
+    Raises:
+        Exception: If there is an error during deletion.
+    """
+    try:
+        domain = conn.lookupByName(vm_name)
+        domain.destroy()  # Stop the VM if it's running
+        domain.undefine()  # Remove the VM definition
+        return True
+    except libvirt.libvirtError as e:
+        if 'does not exist' in str(e):
+            return False  # VM not found
+        raise e  # Re-raise other errors  

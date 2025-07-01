@@ -5,29 +5,50 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-def validate_vm_name(vm_name: str) -> str:
+def validate_size_gb(size_gb: int) -> int:
     """
-    Validate VM name format.
+    Validate size in GB for storage volumes.
     
     Args:
-        vm_name: VM name to validate
+        size_gb: Size in GB to validate
         
     Returns:
-        str: Validated VM name
+        int: Validated size in GB
         
     Raises:
-        ValueError: If VM name format is invalid
+        ValueError: If size is not a positive integer or exceeds 1024 GB
     """
-    if not vm_name or not isinstance(vm_name, str):
-        raise ValueError('VM name must be a non-empty string')
+    if not isinstance(size_gb, int) or size_gb <= 0:
+        raise ValueError('Size must be a positive integer')
     
-    if not re.match(r'^[a-zA-Z0-9_-]+$', vm_name):
-        raise ValueError('VM name must contain only alphanumeric characters, hyphens, and underscores')
+    if size_gb > 1024:
+        raise ValueError('Size must not exceed 1024 GB')
     
-    if len(vm_name) > 255:
-        raise ValueError('VM name must be 255 characters or less')
+    return size_gb
+
+def validate_name(name: str, type_name: str = "Name") -> str:
+    """
+    Validate storage volume name format.
     
-    return vm_name
+    Args:
+        volume_name: Storage volume name to validate
+        
+    Returns:
+        str: Validated storage volume name
+        
+    Raises:
+        ValueError: If volume name format is invalid
+    """
+    if not name or not isinstance(name, str):
+        raise ValueError(f'{type_name} must be a non-empty string')
+
+    if not re.match(r'^[a-zA-Z0-9_-]+$', name):
+        raise ValueError(f'{type_name} must contain only alphanumeric characters, hyphens, and underscores')
+
+    if len(name) > 255:
+        raise ValueError(f'{type_name} must be 255 characters or less')
+
+    return name
 
 def validate_target_device(target_dev: Optional[str]) -> Optional[str]:
     """

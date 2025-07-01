@@ -1,17 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from pydantic import BaseModel, Field, field_validator
 import libvirt
 import logging
 from src.services.disk_attach import get_next_available_virtio_dev, attach_disk
 from src.services.disk_detach import detach_disk
+from src.services.disk_create import create_disk_volume
 from src.utils.constants import COMMON_API_RESPONSES
 from src.utils.libvirt_utils import get_connection_dependency
-from src.utils.validation_utils import validate_vm_name, validate_target_device, validate_qcow2_path
+from src.utils.validation_utils import validate_target_device, validate_qcow2_path
 from src.utils.exceptions import DiskNotFound
 from src.services.disk_utils import list_vm_disks
 from src.utils.config import config
 from src.schemas.attach_disk_request import AttachDiskRequest
 from src.schemas.base_schemas import BaseDiskRequest
+from src.schemas.create_volume_request import CreateVolumeRequest
 
 logger = logging.getLogger(__name__)
 router = APIRouter(
@@ -21,6 +23,49 @@ router = APIRouter(
         **COMMON_API_RESPONSES,
         }
     )
+
+@router.post("/create",
+            summary="Create a new disk volume",
+            description="Create a new QCOW2 disk volume in a specified storage pool on the libvirt host.",
+            status_code=status.HTTP_201_CREATED)
+async def create_disk_volume_endpoint(request: CreateVolumeRequest, conn: libvirt.virConnect = Depends(get_connection_dependency)):
+    """
+    Create a new disk (storage volume) on the libvirt host.
+
+    Args:
+        request: CreateVolumeRequest containing pool name, volume name, and size.
+
+    Returns:
+        dict: Success status and the full path of the created volume.
+    """
+    logger.info(f"Disk volume creation request - Pool: {request.pool_name}, Name: {request.volume_name}, Size: {request.size_gb}GB")
+    try:
+        volume_path = create_disk_volume(conn, request.volume_name, int(request.size_gb), request.pool_name)
+        return {"status": "success", "volume_path": volume_path}
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except libvirt.libvirtError as e:
+        # Check for specific libvirt error for existing volume
+        if e.get_error_code() == libvirt.VIR_ERR_STORAGE_VOL_EXIST:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Storage volume '{request.volume_name}' already exists in pool '{request.pool_name}'.")
+        logger.error(f"Libvirt error during volume creation: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal libvirt error.")
+
+@router.delete("/delete",
+             summary="Delete a disk volume",
+             description="Delete a disk volume from a storage pool on the libvirt host.",
+             status_code=status.HTTP_204_NO_CONTENT)
+async def delete_disk_volume_endpoint(pool_name: str, volume_name: str, conn: libvirt.virConnect = Depends(get_connection_dependency)):
+    """
+    Delete a disk (storage volume) from the libvirt host. This is idempotent.
+    """
+    from src.services.volume_utils import delete_volume
+    logger.info(f"Disk volume deletion request - Pool: {pool_name}, Name: {volume_name}")
+    try:
+        delete_volume(conn, pool_name, volume_name)
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 @router.post("/attach", 
             summary="Attach disk to VM",

@@ -4,9 +4,9 @@ import logging
 from src.schemas.create_vm_request import CreateVMRequest
 from src.services.disk_utils import list_vm_disks
 from src.utils.libvirt_utils import get_connection_dependency
-from src.utils.validation_utils import validate_vm_name
-from src.services.vm_create import create_vm
-from src.services.vm_start_stop import start_vm
+from src.utils.validation_utils import validate_name
+from src.services.vm_create_del import create_vm, delete_vm
+from src.services.vm_start_stop import start_vm, stop_vm
 from src.utils.config import config
 from src.utils.constants import COMMON_API_RESPONSES
 
@@ -90,7 +90,7 @@ async def list_disks(vm_name: str, conn: libvirt.virConnect = Depends(get_connec
     
     # Validate VM name format
     try:
-        validate_vm_name(vm_name)
+        validate_name(vm_name)
     except ValueError as e:
         logger.error(f"Invalid VM name: {e}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -151,7 +151,6 @@ async def stop_vm_endpoint(vm_name: str, conn = Depends(get_connection_dependenc
     Raises:
         HTTPException: 404 for not found, 500 for server errors
     """
-    from src.services.vm_start_stop import stop_vm
     try:
         if stop_vm(vm_name, conn):
             return {"status": "success"}
@@ -162,4 +161,34 @@ async def stop_vm_endpoint(vm_name: str, conn = Depends(get_connection_dependenc
         raise http_exc
     except Exception as e:
         logger.error(f"Error stopping VM '{vm_name}': {repr(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@router.delete("/delete/{vm_name}",
+               summary="Delete a virtual machine",
+               description="Delete a virtual machine by its name.",
+               )
+async def delete_vm_endpoint(vm_name: str, conn = Depends(get_connection_dependency)):
+    """
+    Delete a virtual machine by its name.
+
+    Args:
+        vm_name (str): Name of the virtual machine to delete.
+        conn (libvirt.virConnect): Connection to the libvirt hypervisor.
+
+    Returns:
+        dict: Success status
+
+    Raises:
+        HTTPException: 404 for not found, 500 for server errors
+    """
+    try:
+        if delete_vm(vm_name, conn):
+            return {"status": "success"}
+        else:
+            raise HTTPException(status_code=404, detail="VM not found")
+    except HTTPException as http_exc:
+        # Re-raise HTTPExceptions (such as 404) so FastAPI can handle them properly
+        raise http_exc
+    except Exception as e:
+        logger.error(f"Error deleting VM '{vm_name}': {repr(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error")

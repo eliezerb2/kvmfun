@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, field_validator
-from src.utils.validation_utils import validate_target_device, validate_vm_name
+from src.utils.validation_utils import validate_target_device, validate_name
 
 class BaseVMRequest(BaseModel):
     """Base request model for virtual machine operations."""
@@ -7,10 +7,10 @@ class BaseVMRequest(BaseModel):
 
     @field_validator('vm_name')
     @classmethod
-    def validate_vm_name(cls, value: str) -> str:
+    def validate_name(cls, value: str) -> str:
         """Validate the VM name."""
-        return validate_vm_name(value)
-    
+        return validate_name(value, "VM name")
+
 class BaseDiskRequest(BaseVMRequest):
     """Request model for disk detachment."""
     target_dev: str = Field(..., description="Target device name to detach", min_length=1)

@@ -76,7 +76,7 @@ env:
   
   # Libvirt connection URI (e.g., qemu:///system, qemu+ssh://user@host:port/system)
   - name: LIBVIRT_URI
-    value: "qemu+ssh://your_ubuntu_username@127.0.0.1:2222/system"
+    value: "qemu+ssh://osboxes@host.docker.internal:2222/system"
   
   # =============================================================================
   # DISK MANAGEMENT CONFIGURATION

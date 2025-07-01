@@ -33,6 +33,7 @@ WORKDIR /app
 # 'libvirt-client' provides the necessary shared libraries (.so files) for the application to run.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libvirt-clients \
+    openssh-client \
     qemu-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
