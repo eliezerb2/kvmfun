@@ -1,5 +1,4 @@
 import re
-import os
 import logging
 from typing import Optional
 
@@ -50,7 +49,7 @@ def validate_name(name: str, type_name: str = "Name") -> str:
 
     return name
 
-def validate_target_device(target_dev: Optional[str]) -> Optional[str]:
+def validate_target_device(target_dev: Optional[str]) -> str:
     """
     Validate target device name format.
     
@@ -64,7 +63,7 @@ def validate_target_device(target_dev: Optional[str]) -> Optional[str]:
         ValueError: If target device format is invalid
     """
     if target_dev is None:
-        return None
+        return ""
     
     if not isinstance(target_dev, str):
         raise ValueError('Target device must be a string')
@@ -93,10 +92,9 @@ def validate_qcow2_path(qcow2_path: str) -> str:
     if not qcow2_path.endswith('.qcow2'):
         raise ValueError('Disk path must end with .qcow2')
     
-    if not os.path.exists(qcow2_path):
-        raise ValueError(f'Disk file not found: {qcow2_path}')
-    
-    if not os.access(qcow2_path, os.R_OK):
-        raise ValueError(f'Disk file is not readable: {qcow2_path}')
+    # Filesystem checks like os.path.exists() are not appropriate here,
+    # as the API server runs in a container and does not have direct access
+    # to the libvirt host's filesystem. Libvirt will validate the path's
+    # existence and accessibility on the host.
     
     return qcow2_path

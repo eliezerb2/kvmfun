@@ -1,5 +1,28 @@
 {
   "git.inputValidation": true,
   "git.inputValidationLength": 72,
-  "git.inputValidationSubjectLength": 50
+  "git.inputValidationSubjectLength": 50,
+
+  // Disable Pylance completely
+  "python.languageServer": "None",
+  
+  // Disable Pylance-specific features
+  "pylance.enabled": false,
+  
+  // Ensure Pyright is enabled
+  "pyright.enabled": true,
+
+  // Enable Pyright
+  "pyright.typeCheckingMode": "basic",
+  "pyright.openFilesOnly": false,
+  
+  // Import-specific settings
+  "pyright.diagnosticSeverityOverrides": {
+    "reportUnusedImport": "warning",
+    "reportMissingImports": "error",
+    "reportUndefinedVariable": "error"
+  },
+  "cSpell.words": [
+    "kvmfun"
+  ]
 }

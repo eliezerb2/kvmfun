@@ -1,12 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Response
-import libvirt
+from fastapi import APIRouter, Depends, HTTPException # type: ignore
+import libvirt # type: ignore
 import logging
+from src.schemas.base_schemas import BaseVMRequest
 from src.schemas.create_vm_request import CreateVMRequest
-from src.services.disk_utils import list_vm_disks
 from src.utils.libvirt_utils import get_connection_dependency
-from src.utils.validation_utils import validate_name
-from src.services.vm_create_del import create_vm, delete_vm
-from src.services.vm_start_stop import start_vm, stop_vm
+from src.services.vm_services import create_vm, delete_vm, start_vm, stop_vm
 from src.utils.config import config
 from src.utils.constants import COMMON_API_RESPONSES
 
@@ -18,6 +16,42 @@ router = APIRouter(
         **COMMON_API_RESPONSES,
         }
     )
+
+@router.get("/list",
+            summary="List all virtual machines",
+            description="List all virtual machines defined in the libvirt hypervisor.",
+            )
+async def list_vms_endpoint(conn: libvirt.virConnect = Depends(get_connection_dependency)):
+    """
+    List all virtual machines defined in the libvirt hypervisor.
+
+    This endpoint retrieves a list of all VMs, including their names, UUIDs, states, and other properties.
+
+    Args:
+        conn (libvirt.virConnect): Connection to the libvirt hypervisor.
+
+    Returns:
+        dict: List of VMs with their properties
+
+    Raises:
+        HTTPException: 500 for server errors
+    """
+    try:
+        vms = conn.listAllDomains(0)
+        vm_list = []
+        for vm in vms:
+            vm_info = vm.info()
+            vm_list.append({
+                "name": vm.name(),
+                "uuid": vm.UUIDString(),
+                "state": vm_info[0],
+                "max_memory": vm_info[1],
+                "max_vcpus": vm_info[2]
+            })
+        return {"vms": vm_list}
+    except libvirt.libvirtError as e:
+        logger.error(f"Libvirt error while listing VMs: {repr(e)}", exc_info=True)
+        raise HTTPException(status_code=500)
 
 @router.post("/create",
              summary="Create a new virtual machine",
@@ -60,49 +94,11 @@ async def create_vm_endpoint(request: CreateVMRequest, conn: libvirt.virConnect 
         raise HTTPException(status_code=400, detail=str(e))
     except libvirt.libvirtError as e:
         logger.error(f"Libvirt error during VM creation: {repr(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500)
     except Exception as e:
         logger.error(f"Unexpected error during VM creation: {repr(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500)
 
-@router.get("/list/{vm_name}", 
-           summary="List VM disks",
-           description="List all file-backed disks attached to a virtual machine",
-           )
-async def list_disks(vm_name: str, conn: libvirt.virConnect = Depends(get_connection_dependency)):
-    """
-    List all disks attached to a virtual machine.
-    
-    This endpoint retrieves information about all file-backed disks currently
-    attached to the specified virtual machine.
-    
-    Args:
-        vm_name: Name of the virtual machine (alphanumeric, hyphens, underscores only)
-    
-    Returns:
-        dict: VM name and list of attached disks with their properties
-        
-    Raises:
-        HTTPException: 400 for invalid VM name, 404 for VM not found, 
-                      500 for server errors
-    """
-    logger.info(f"Disk list request for VM: {vm_name}")
-    
-    # Validate VM name format
-    try:
-        validate_name(vm_name)
-    except ValueError as e:
-        logger.error(f"Invalid VM name: {e}")
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    
-    dom = conn.lookupByName(vm_name)
-    logger.info(f"Successfully connected to VM '{vm_name}'")
-    
-    disks = list_vm_disks(dom)
-    
-    logger.info(f"Successfully listed {len(disks)} disks for VM '{vm_name}'")
-    return {"vm_name": vm_name, "disks": disks}
-    
 @router.post("/start/{vm_name}",
              summary="Start a virtual machine",
              description="Start a virtual machine by its name.",
@@ -125,13 +121,13 @@ async def start_vm_endpoint(vm_name: str, conn = Depends(get_connection_dependen
         if start_vm(vm_name, conn):
             return {"status": "success"}
         else:
-            raise HTTPException(status_code=404, detail="VM not found")
+            raise HTTPException(status_code=404)
     except HTTPException as http_exc:
         # Re-raise HTTPExceptions (such as 404) so FastAPI can handle them properly
         raise http_exc
     except Exception as e:
         logger.error(f"Error starting VM '{vm_name}': {repr(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500)
     
 @router.post("/stop/{vm_name}",
              summary="Stop a virtual machine",
@@ -155,13 +151,13 @@ async def stop_vm_endpoint(vm_name: str, conn = Depends(get_connection_dependenc
         if stop_vm(vm_name, conn):
             return {"status": "success"}
         else:
-            raise HTTPException(status_code=404, detail="VM not found")
+            raise HTTPException(status_code=404)
     except HTTPException as http_exc:
         # Re-raise HTTPExceptions (such as 404) so FastAPI can handle them properly
         raise http_exc
     except Exception as e:
         logger.error(f"Error stopping VM '{vm_name}': {repr(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500)
 
 @router.delete("/delete/{vm_name}",
                summary="Delete a virtual machine",
@@ -185,10 +181,10 @@ async def delete_vm_endpoint(vm_name: str, conn = Depends(get_connection_depende
         if delete_vm(vm_name, conn):
             return {"status": "success"}
         else:
-            raise HTTPException(status_code=404, detail="VM not found")
+            raise HTTPException(status_code=404)
     except HTTPException as http_exc:
         # Re-raise HTTPExceptions (such as 404) so FastAPI can handle them properly
         raise http_exc
     except Exception as e:
         logger.error(f"Error deleting VM '{vm_name}': {repr(e)}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal server error")
+        raise HTTPException(status_code=500)

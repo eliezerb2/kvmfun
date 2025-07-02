@@ -97,3 +97,4 @@ appConfig:
   API_PREFIX: "/api/v1"
   VM_ROUTER_PREFIX: "/vm"
   DISK_ROUTER_PREFIX: "/disk"
+  VOLUME_ROUTER_PREFIX: "/volume"

@@ -1,10 +1,27 @@
-import libvirt
+import libvirt # type: ignore
 import xml.etree.ElementTree as ET
 import logging
-from typing import Tuple
 from src.utils.config import config
 
 logger = logging.getLogger(__name__)
+
+# Compatibility shim for older libvirt-python versions that may lack modern flags.
+# This patches the module with integer values that correspond to the flags,
+# allowing the code to run even if the Python bindings are slightly outdated.
+if not hasattr(libvirt, 'VIR_DOMAIN_ATTACH_DEVICE_LIVE'):
+    setattr(libvirt, 'VIR_DOMAIN_ATTACH_DEVICE_LIVE', 1)
+if not hasattr(libvirt, 'VIR_DOMAIN_ATTACH_DEVICE_PERSIST'):
+    setattr(libvirt, 'VIR_DOMAIN_ATTACH_DEVICE_PERSIST', 2)
+if not hasattr(libvirt, 'VIR_DOMAIN_ATTACH_DEVICE_CONFIG'):
+    setattr(libvirt, 'VIR_DOMAIN_ATTACH_DEVICE_CONFIG', 4)
+
+if not hasattr(libvirt, 'VIR_DOMAIN_AFFECT_LIVE'):
+    setattr(libvirt, 'VIR_DOMAIN_AFFECT_LIVE', 1)
+if not hasattr(libvirt, 'VIR_DOMAIN_AFFECT_CONFIG'):
+    setattr(libvirt, 'VIR_DOMAIN_AFFECT_CONFIG', 2)
+
+if not hasattr(libvirt, 'VIR_DOMAIN_XML_LIVE'):
+    setattr(libvirt, 'VIR_DOMAIN_XML_LIVE', 1)
 
 LIBVIRT_DOMAIN_NAMESPACE = "http://libvirt.org/schemas/domain/1.0"
 NAMESPACES = {'lib': LIBVIRT_DOMAIN_NAMESPACE}

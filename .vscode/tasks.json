@@ -115,12 +115,12 @@
         {
             "label": "Run Helm Tests",
             "type": "shell",
-            "command": "helm",
+            "command": "pwsh.exe",
             "args": [
-                "test",
-                "kvmfun",
-                "--logs"
-            ],
+                "-ExecutionPolicy", "Bypass",
+                "-NoProfile", 
+                "-File", "${workspaceFolder}/.vscode/run_helm_tests_colored.ps1",
+             ],
             "group": {
                 "kind": "test",
                 "isDefault": true

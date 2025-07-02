@@ -1,12 +1,9 @@
-import libvirt
-import xml.etree.ElementTree as ET
-import os
+import libvirt # type: ignore
 import logging
 import time
-from typing import Optional
 from src.services.disk_utils import _check_disk_conflicts, _create_disk_xml
 from src.utils.config import config
-from src.utils.libvirt_utils import parse_domain_xml, get_next_available_virtio_dev, NAMESPACES, LIBVIRT_DOMAIN_NAMESPACE
+from src.utils.libvirt_utils import parse_domain_xml, NAMESPACES
 from src.utils.validation_utils import validate_qcow2_path
 
 logger = logging.getLogger(__name__)
@@ -48,6 +45,7 @@ def attach_disk(dom: libvirt.virDomain, qcow2_path: str, target_dev: str) -> boo
             return True  # Already attached
         
         disk_xml = _create_disk_xml(qcow2_path, target_dev)
+        
         flags = (libvirt.VIR_DOMAIN_ATTACH_DEVICE_LIVE | 
                 libvirt.VIR_DOMAIN_ATTACH_DEVICE_PERSIST | 
                 libvirt.VIR_DOMAIN_ATTACH_DEVICE_CONFIG)

@@ -1,10 +1,10 @@
-import libvirt
+import libvirt #type: ignore
 import logging
 import textwrap
 
 logger = logging.getLogger(__name__)
 
-def create_disk_volume(
+def create_volume(
     conn: libvirt.virConnect, 
     vol_name: str, 
     size_gb: int,
@@ -62,10 +62,3 @@ def create_disk_volume(
     except libvirt.libvirtError as e:
         logger.error(f"Failed to create volume '{vol_name}' in pool '{pool_name}': {e}")
         raise ValueError(f"Failed to create disk image remotely: {e}")
-
-# Note:
-# Many libvirt installations (especially on Linux with QEMU/KVM) provide a default storage pool named 'default'.
-# You can check for its existence with:
-#   conn.storagePoolLookupByName('default')
-# If it does not exist, you must create and start a storage pool before creating volumes.
-# The pool must also be active (started).

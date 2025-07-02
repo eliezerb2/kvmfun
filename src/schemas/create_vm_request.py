@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator # type: ignore
 from src.utils.validation_utils import validate_qcow2_path
 from src.schemas.base_schemas import BaseVMRequest
 
