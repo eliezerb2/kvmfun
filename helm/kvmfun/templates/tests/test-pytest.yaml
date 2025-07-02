@@ -1,0 +1,28 @@
+{{- if .Values.tests.enabled -}}
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "kvmfun.fullname" . }}-pytest-test"
+  labels:
+    {{- include "kvmfun.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  serviceAccountName: {{ include "kvmfun.serviceAccountName" . }}
+  initContainers:
+    {{- include "kvmfun.pod.initcontainer" . | nindent 4 }}
+  containers:
+    - name: pytest
+      image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
+      imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
+      command: ["pytest", "-v", "tests/e2e", "-s"]
+      volumeMounts:
+        {{- include "kvmfun.pod.volumeMounts" . | nindent 8 }}
+      envFrom:
+        - configMapRef:
+            name: {{ include "kvmfun.fullname" . }}-env
+  volumes:
+    {{- include "kvmfun.pod.volumes" . | nindent 4 }}
+  restartPolicy: Never
+{{- end }}

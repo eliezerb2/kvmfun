@@ -1,6 +1,30 @@
 {
     "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "vmSSHPassword",
+            "type": "promptString",
+            "description": "Enter VM password:",
+            "password": true
+        }
+    ],
     "tasks": [
+        {
+            "label": "Setup SSH Keys",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-ExecutionPolicy", "Bypass",
+                "-File", "${workspaceFolder}/.vscode/setup-ssh-keys.ps1",
+                // "-sshPassword", "${input:vmSSyHPassword}"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": []
+        },
         { "label": "Uninstall",
             "type": "shell",
             "command": "powershell",

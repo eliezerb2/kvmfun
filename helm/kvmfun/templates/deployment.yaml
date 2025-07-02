@@ -13,14 +13,19 @@ spec:
     metadata:
       labels:
         {{- include "kvmfun.selectorLabels" . | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
+      serviceAccountName: {{ include "kvmfun.serviceAccountName" . }}
+      initContainers:
+        {{- include "kvmfun.pod.initcontainer" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.service.targetPort }}
+              containerPort: {{ .Values.appConfig.PORT }}
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -38,12 +43,13 @@ spec:
             periodSeconds: 5
             timeoutSeconds: 3
             failureThreshold: 3
+          volumeMounts:
+            {{- include "kvmfun.pod.volumeMounts" . | nindent 12 }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.env }}
-          env:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "kvmfun.fullname" . }}-env
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -56,3 +62,5 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+        {{- include "kvmfun.pod.volumes" . | nindent 8 }}
