@@ -36,10 +36,9 @@ async def create_volume_endpoint(request: CreateVolumeRequest, conn: libvirt.vir
     """
     logger.info(f"Disk volume creation request - Pool: {request.pool_name}, Name: {request.volume_name}, Size: {request.size_gb}GB")
     try:
+        # The service layer returns the full, correct path. Do not modify it.
         volume_path = create_volume(conn, request.volume_name, int(request.size_gb), request.pool_name)
-        # The service returns the path without the extension. Append it for a consistent API response.
-        full_volume_path = f"{volume_path}.qcow2"
-        return {"status": "success", "volume_path": full_volume_path}
+        return {"status": "success", "volume_path": volume_path}
     except ValueError as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
     except libvirt.libvirtError as e:
@@ -56,7 +55,7 @@ async def create_volume_endpoint(request: CreateVolumeRequest, conn: libvirt.vir
              responses={
                 409: {"description": "Volume is in use by a VM and cannot be deleted"},
              })
-async def delete_volume_endpoint(request: BaseVolumeRequest, conn: libvirt.virConnect = Depends(get_connection_dependency)):
+async def delete_volume_endpoint(request: BaseVolumeRequest = Depends(), conn: libvirt.virConnect = Depends(get_connection_dependency)):
     """
     Delete a disk (storage volume) from the libvirt host. This is idempotent.
     """

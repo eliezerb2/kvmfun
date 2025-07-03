@@ -39,11 +39,12 @@ def validate_name(name: str, type_name: str = "Name") -> str:
         ValueError: If volume name format is invalid
     """
     if not name or not isinstance(name, str):
-        raise ValueError(f'{type_name} must be a non-empty string')
+        msg = f'{type_name} must be a non-empty string'
+        logger.error(msg)
+        raise ValueError(msg)
 
-    if not re.match(r'^[a-zA-Z0-9_-]+$', name):
-        raise ValueError(f'{type_name} must contain only alphanumeric characters, hyphens, and underscores')
-
+    if not re.match(r'^[a-zA-Z0-9_.-]+$', name):
+        raise ValueError(f'{type_name} must contain only alphanumeric characters, hyphens, underscores, and periods')
     if len(name) > 255:
         raise ValueError(f'{type_name} must be 255 characters or less')
 

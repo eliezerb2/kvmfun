@@ -1,5 +1,4 @@
 import os
-import uuid
 import pytest #type: ignore
 from src.api.disk_endpoints import logger
 from tests.e2e import start_vm_test
@@ -10,7 +9,7 @@ from tests.e2e.start_vm_test import start_vm_test
 # This test requires a running VM to attach a disk to.
 # Replace with a VM name that exists on your libvirt host.
 TEST_VM_NAME = "ubuntu-test-vm" 
-TEST_VOLUME_NAME = f"e2e-test-vol"
+TEST_VOLUME_NAME = f"e2e-test-vol.qcow2"
 
 @pytest.mark.e2e
 def test_main_process(client):
@@ -25,10 +24,13 @@ def test_main_process(client):
     pool_name = os.environ.get("LIBVIRT_STORAGE_POOL")
     assert pool_name, "LIBVIRT_STORAGE_POOL environment variable must be set for E2E tests"
 
+    full_volume_path: str = ""
+    vm_created: bool = False
+    vm_started: bool = False
     target_dev = None
 
     try:
-        full_volume_path: str = create_volume_test(client, TEST_VOLUME_NAME) + ".qcow2"
+        full_volume_path: str = create_volume_test(client, TEST_VOLUME_NAME)
         vm_created: bool = create_vm_test(client, TEST_VM_NAME, full_volume_path)
         vm_started: bool = start_vm_test(client, TEST_VM_NAME)
 
@@ -73,7 +75,7 @@ def test_main_process(client):
             assert delete_vm_response.status_code == 200
         logger.debug("================ 8. Delete the disk volume ============")
         if full_volume_path:
-            logger.info(f"Cleaning up volume '{base_volume_name}'...")
-            delete_response = client.delete(f"/api/v1/disk/delete?pool_name={pool_name}&volume_name={base_volume_name}")
+            logger.info(f"Cleaning up volume '{TEST_VOLUME_NAME}'...")
+            delete_response = client.delete(f"/api/v1/volume/delete?pool_name={pool_name}&volume_name={TEST_VOLUME_NAME}")
             logger.debug(f"Delete response: {delete_response.status_code}")
             assert delete_response.status_code == 204

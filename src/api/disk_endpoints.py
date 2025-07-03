@@ -9,7 +9,6 @@ from src.utils.validation_utils import validate_name
 from src.utils.exceptions import DiskNotFound
 from src.services.disk_utils import list_vm_disks
 from src.utils.config import config
-from src.schemas.base_schemas import BaseVMRequest
 from src.schemas.attach_disk_request import AttachDiskRequest
 from src.schemas.detach_disk_request import DetachDiskRequest
 
@@ -26,7 +25,7 @@ router = APIRouter(
            summary="List VM disks",
            description="List all file-backed disks attached to a virtual machine",
            )
-async def list_disks_endpoint(request: BaseVMRequest, conn: libvirt.virConnect = Depends(get_connection_dependency)):
+async def list_disks_endpoint(vm_name: str, conn: libvirt.virConnect = Depends(get_connection_dependency)):
     """
     List all disks attached to a virtual machine.
     
@@ -43,22 +42,22 @@ async def list_disks_endpoint(request: BaseVMRequest, conn: libvirt.virConnect =
         HTTPException: 400 for invalid VM name, 404 for VM not found, 
                       500 for server errors
     """
-    logger.info(f"Disk list request for VM: {request.vm_name}")
+    logger.info(f"Disk list request for VM: {vm_name}")
 
     # Validate VM name format
     try:
-        validate_name(request.vm_name)
+        validate_name(vm_name)
     except ValueError as e:
         logger.error(f"Invalid VM name: {e}")
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    dom = conn.lookupByName(request.vm_name)
-    logger.info(f"Successfully connected to VM '{request.vm_name}'")
+    dom = conn.lookupByName(vm_name)
+    logger.info(f"Successfully connected to VM '{vm_name}'")
 
     disks = list_vm_disks(dom)
 
-    logger.info(f"Successfully listed {len(disks)} disks for VM '{request.vm_name}'")
-    return {"vm_name": request.vm_name, "disks": disks}
+    logger.info(f"Successfully listed {len(disks)} disks for VM '{vm_name}'")
+    return {"vm_name": vm_name, "disks": disks}
 
 @router.post("/attach",
             summary="Attach disk to VM",
