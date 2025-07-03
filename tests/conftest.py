@@ -1,7 +1,7 @@
-import pytest
-from fastapi.testclient import TestClient
+import pytest # type: ignore
+from fastapi.testclient import TestClient # type: ignore
 from unittest.mock import Mock
-import libvirt
+import libvirt # type: ignore
 
 from src.main import app
 from src.utils.libvirt_utils import get_connection_dependency
@@ -9,7 +9,7 @@ from src.utils.libvirt_utils import get_connection_dependency
 # Ensure libvirt.VIR_DOMAIN_XML_LIVE exists for tests using mocks
 if not hasattr(libvirt, "VIR_DOMAIN_XML_LIVE"):
     libvirt.VIR_DOMAIN_XML_LIVE = 1
-
+    
 @pytest.fixture(scope="session")
 def client():
     """Fixture to provide a FastAPI TestClient."""

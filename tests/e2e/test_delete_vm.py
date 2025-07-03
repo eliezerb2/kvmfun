@@ -1,7 +1,7 @@
 from src.api.vm_endpoints import logger
 from tests.e2e.utils import vm_exists
 
-def delete_vm_test(client, vm_name):
+def test_delete_vm(client, vm_name):
     """
     Test deleting a VM by its name.
     Args:

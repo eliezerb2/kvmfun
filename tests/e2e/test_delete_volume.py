@@ -1,8 +1,7 @@
-from logging import log
 from src.api.volume_endpoints import logger
 from tests.e2e.utils import volume_exists
 
-def delete_volume_test(client, pool_name: str, volume_name: str) -> bool:
+def test_delete_volume(client, pool_name: str, volume_name: str) -> bool:
     """
     Test deleting a volume by its full path.
     

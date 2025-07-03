@@ -1,6 +1,6 @@
 from src.api.volume_endpoints import logger
 
-def list_volumes_test(client, pool_name: str) -> list:
+def test_list_volumes(client, pool_name: str) -> list:
     """
     Test listing all volumes in a given storage pool.
 

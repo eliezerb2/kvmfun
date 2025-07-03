@@ -1,6 +1,5 @@
-from logging import log
 from src.api.volume_endpoints import logger
-from tests.e2e.list_volumes_test import list_volumes_test
+from tests.e2e.test_list_volumes import test_list_volumes
 
 def pool_exists(client, pool_name: str) -> bool:
     """
@@ -40,7 +39,7 @@ def volume_exists(client, pool_name: str, volume_name: str) -> bool:
         return False
     try:
         logger.debug(f"Listing volumes in pool '{pool_name}'...")
-        volumes = list_volumes_test(client, pool_name)
+        volumes = test_list_volumes(client, pool_name)
         return any(v['name'] == volume_name for v in volumes)
     except Exception as e:
         logger.error(f"Error checking if volume exists: {e}")

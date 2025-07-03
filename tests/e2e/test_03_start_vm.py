@@ -1,6 +1,6 @@
 from src.api.vm_endpoints import logger
 
-def start_vm_test(client, vm_name: str) -> bool:
+def test_start_vm(client, vm_name: str) -> bool:
     """
     Test the real start_vm function.
     This function is intended to be run in an environment where the necessary
