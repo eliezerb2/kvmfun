@@ -1,27 +1,44 @@
 # .vscode/HighlightOutput.ps1
 param(
-    [Parameter(ValueFromPipeline=$true)] # Removed Mandatory=$true as it's not needed with pipeline input for this scenario
-    [AllowEmptyString()]                 # *** THIS IS THE CRUCIAL ADDITION ***
+    [Parameter(ValueFromPipeline=$true)]
+    [AllowEmptyString()]
     [string]$Line
 )
 
-# ANSI escape codes for colors
-# Red: `e[31m`
-# Green: `e[32m`
-# Reset: `e[0m` (important to reset color after use)
+enum Color {
+    Red = 31
+    Green = 32
+    Yellow = 33
+    Blue = 34
+    Reset = 0
+}
 
-# It's good practice to handle null or empty lines explicitly before trying to match.
-if ([string]::IsNullOrEmpty($Line)) {
-    Write-Host "" # If the line is empty, just print an empty line
+# Ensure the most critical/specific matches come first
+switch -Regex ($Line) {
+    "ERROR" {
+        $selectedColor = [Color]::Red
+        Break
+    }
+    "Failed" { # This will only be hit if "ERROR" wasn't present and "Failed" is
+        $selectedColor = [Color]::Red
+        Break
+    }
+    "WARNING" {
+        $selectedColor = [Color]::Yellow
+        Break
+    }
+    "Succeeded" {
+        $selectedColor = [Color]::Green
+        Break
+    }
+    "======="{ # This regex specifically matches "======="
+        $selectedColor = [Color]::Blue
+        Break
+    }
+    Default {
+        $selectedColor = [Color]::Reset
+        # No need for break here, as it's the last block
+    }
 }
-elseif ($Line -match "Failed") {
-    Write-Host ("`e[31m" + $Line + "`e[0m")
-} elseif ($Line -match "Succeeded") {
-    Write-Host ("`e[32m" + $Line + "`e[0m")
-} elseif ($Line -match "ERROR") {
-    Write-Host ("`e[31m" + $Line + "`e[0m")
-}
-# Pass through lines that don't match any condition, without coloring
-else {
-    Write-Host $Line
-}
+
+Write-Host "$([char]27)[$([int]$selectedColor)m$($Line)$([char]27)[0m"
