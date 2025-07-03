@@ -92,7 +92,9 @@ def delete_vm(vm_name: str, conn: libvirt.virConnect) -> bool:
     """
     try:
         domain = conn.lookupByName(vm_name)
-        domain.destroy()  # Stop the VM if it's running
+        # check if vm is running
+        if domain.isActive():
+            domain.destroy()  # Stop the VM if it's running
         domain.undefine()  # Remove the VM definition
         return True
     except libvirt.libvirtError as e:

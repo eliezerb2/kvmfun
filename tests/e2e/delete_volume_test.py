@@ -1,6 +1,8 @@
+from logging import log
 from src.api.volume_endpoints import logger
+from tests.e2e.utils import volume_exists
 
-def delete_volume_test(client, pool_name: str, full_volume_path: str) -> bool:
+def delete_volume_test(client, pool_name: str, volume_name: str) -> bool:
     """
     Test deleting a volume by its full path.
     
@@ -13,19 +15,20 @@ def delete_volume_test(client, pool_name: str, full_volume_path: str) -> bool:
         bool: True if deletion was successful, False otherwise
     """
     logger.debug("===================== delete volume =====================")
-    logger.debug(f"Checking if volume exists: {full_volume_path}")
-    # Use list_volumes to check if the volume exists
-    list_response = client.get(f"/api/v1/volume/{pool_name}/list")
-    logger.debug(f"List response: {list_response.status_code} {list_response.json()}")
-    assert list_response.status_code == 200
-    volumes = list_response.json().get('volumes', [])
-    if not any(v['name'] == full_volume_path for v in volumes):
-        logger.info(f"Volume '{full_volume_path}' does not exist, skipping deletion.")
+    try:
+        if not volume_exists(client, pool_name, volume_name):
+            logger.info(f"Volume '{volume_name}' does not exist, skipping deletion.")
+            return True
+    except Exception as e:
+        logger.error(f"Error during volume list: {e}")
+        raise
+    try:   
+        logger.info(f"Deleting volume '{volume_name}'...")
+        response = client.delete(f"/api/v1/volume/{pool_name}/delete/{volume_name}")
+        logger.debug(f"Delete volume response: {response.status_code} {response.json()}")
+        assert response.status_code in [200, 204]
+        assert not volume_exists(client, pool_name, volume_name)
         return True
-
-    logger.info(f"Deleting volume '{full_volume_path}'...")
-    response = client.delete(f"/api/v1/volume/{pool_name}/delete/{full_volume_path}")
-    if response.status_code == 204:
-        return True
-    else:
-        raise Exception(f"Failed to delete volume: {response.status_code} {response.text}")
+    except Exception as e:
+        logger.error(f"Error during volume deletion: {e}")
+        raise

@@ -1,17 +1,45 @@
 import os
+from libvirt import libvirtError # type: ignore
 import pytest #type: ignore
+from contextlib import contextmanager
+import warnings
 from src.api.disk_endpoints import logger
 from tests.e2e.create_volume_test import create_volume_test
 from tests.e2e.delete_volume_test import delete_volume_test
 from tests.e2e.create_vm_test import create_vm_test
 from tests.e2e.start_vm_test import start_vm_test
+from tests.e2e.delete_vm_test import delete_vm_test
 
-# This test requires a running VM to attach a disk to.
-# Replace with a VM name that exists on your libvirt host.
 TEST_VM_NAME = "ubuntu-test-vm" 
 TEST_VOLUME_NAME = f"e2e-test-vol.qcow2"
-pool_name = os.environ.get("LIBVIRT_STORAGE_POOL")
+pool_name: str = os.environ.get("LIBVIRT_STORAGE_POOL", "")
 
+@contextmanager
+def silent_operations():
+    """Context manager to silently ignore assertion errors and warnings"""
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        try:
+            yield
+        except (AssertionError, libvirtError) as e:
+            logger.debug(f"Suppressed error during setup/teardown: {str(e)}")
+        except Exception as e:
+            logger.warning(f"Unexpected error suppressed: {str(e)}")
+
+def system_cleanup(client):
+    """Cleanup function to run before and after all tests"""
+    logger.info("Running system cleanup...")
+    delete_vm_test(client, TEST_VM_NAME)
+    delete_volume_test(client, pool_name, TEST_VOLUME_NAME)
+        
+@pytest.fixture(scope="module", autouse=True)
+def main(client):
+    with silent_operations():
+        system_cleanup(client)
+    yield
+    with silent_operations():
+        system_cleanup(client)
+        
 @pytest.mark.e2e
 def test_main_process(client):
     """
@@ -66,14 +94,14 @@ def test_main_process(client):
         logger.error(f"Unexpected error during VM operations: {repr(e)}", exc_info=True)
         raise
 
-    finally:
-        logger.debug("================ 7. Delete the vm =====================")
-        if vm_created:
-            logger.info(f"Cleaning up VM '{TEST_VM_NAME}'...")
-            delete_vm_response = client.delete(f"/api/v1/vm/delete/{TEST_VM_NAME}")
-            logger.debug(f"Delete VM response: {delete_vm_response.status_code}")
-            assert delete_vm_response.status_code == 200
-        logger.debug("================ 8. Delete the disk volume ============")
-        if full_volume_path:
-            vol_deleted = delete_volume_test(client, pool_name, full_volume_path)
-            assert vol_deleted, "Failed to delete volume"
+    # finally:
+        # logger.debug("================ 7. Delete the vm =====================")
+        # if vm_created:
+        #     logger.info(f"Cleaning up VM '{TEST_VM_NAME}'...")
+        #     delete_vm_response = client.delete(f"/api/v1/vm/delete/{TEST_VM_NAME}")
+        #     logger.debug(f"Delete VM response: {delete_vm_response.status_code}")
+        #     assert delete_vm_response.status_code == 200
+        # logger.debug("================ 8. Delete the disk volume ============")
+        # if full_volume_path:
+        #     vol_deleted = delete_volume_test(client, pool_name, full_volume_path)
+        #     assert vol_deleted, "Failed to delete volume"

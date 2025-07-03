@@ -1,4 +1,5 @@
 from src.api.vm_endpoints import logger
+from tests.e2e.utils import vm_exists
 
 def create_vm_test(client, vm_name: str, full_volume_path: str) -> bool:
     """
@@ -8,16 +9,9 @@ def create_vm_test(client, vm_name: str, full_volume_path: str) -> bool:
     """
     logger.debug("===================== create VM =====================")
     try:
-        logger.debug(f"Checking if VM exists: {vm_name}")
-        # use list_vms to check if the VM already exists
-        list_response = client.get(f"/api/v1/vm/list")
-        logger.debug(f"List response: {list_response.status_code} {list_response.json()}")
-        assert list_response.status_code == 200
-        vms = list_response.json().get('vms', [])
-        if any(vm['name'] == vm_name for vm in vms):
+        if vm_exists(client, vm_name):
             logger.info(f"VM '{vm_name}' already exists, skipping creation.")
             return True
-
         logger.info(f"\nCreating VM '{vm_name}'...")
         create_response = client.post(
             "/api/v1/vm/create",
@@ -31,6 +25,7 @@ def create_vm_test(client, vm_name: str, full_volume_path: str) -> bool:
         )
         logger.debug(f"Create response: {create_response.status_code} {create_response.json()}")
         assert create_response.status_code == 201
+        assert vm_exists(client, vm_name)
         return True
     except Exception as e:
         logger.error(f"Error during VM creation: {e}")
