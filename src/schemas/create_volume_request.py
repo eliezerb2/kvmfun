@@ -2,9 +2,8 @@ from dataclasses import Field
 from pydantic import BaseModel, Field, field_validator # type: ignore
 import libvirt # type: ignore
 from src.utils.validation_utils import validate_size_gb
-from src.schemas.base_schemas import BaseVolumeRequest
 
-class CreateVolumeRequest(BaseVolumeRequest):
+class CreateVolumeRequest(BaseModel):
     """Request model for creating a new disk volume in a storage pool."""
     size_gb: int = Field(..., description="The size of the volume to create (in GB).")
     
