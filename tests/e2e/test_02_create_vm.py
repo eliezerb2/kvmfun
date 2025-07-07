@@ -1,11 +1,12 @@
-from logging import log
 import pytest  # type: ignore
-from src.api.vm_endpoints import logger
+import logging
 from tests.e2e.utils import vm_exists
+
+logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
 @pytest.mark.dependency(depends=["test_create_volume"])
-def test_create_vm(test_context) -> bool:
+def test_create_vm(test_context) -> None:
     """
     Test the real create_vm function.
     This function is intended to be run in an environment where the necessary
@@ -18,7 +19,7 @@ def test_create_vm(test_context) -> bool:
     try:
         if vm_exists(client, vm_name):
             logger.info(f"VM '{vm_name}' already exists, skipping creation.")
-            return True
+            return None
         logger.info(f"\nCreating VM '{vm_name}'...")
         json: dict = {
             "vm_name": vm_name,
@@ -35,7 +36,7 @@ def test_create_vm(test_context) -> bool:
         logger.debug(f"Create response: {create_response.status_code} {create_response.json()}")
         assert create_response.status_code == 201
         assert vm_exists(client, vm_name)
-        return True
+        return None
     except Exception as e:
         logger.error(f"Error during VM creation: {e}")
         raise

@@ -1,10 +1,12 @@
 import pytest # type: ignore
-from src.api.volume_endpoints import logger
+import logging
 from tests.e2e.utils import volume_exists
+
+logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
 @pytest.mark.dependency(name="test_create_volume")
-def test_create_volume(test_context) -> bool:
+def test_create_volume(test_context) -> None:
     """
     Test the real create_volume function.
     This function is intended to be run in an environment where the necessary
@@ -17,7 +19,7 @@ def test_create_volume(test_context) -> bool:
     try:
         if volume_exists(client, pool_name, volume_name):
             logger.info(f"Volume '{volume_name}' already exists, skipping creation.")
-            return True
+            return None
         logger.info(f"\nCreating volume '{volume_name}' in pool '{pool_name}'...")
         create_response = client.post(
             f"/api/v1/volume/{pool_name}/create/{volume_name}",
@@ -31,7 +33,7 @@ def test_create_volume(test_context) -> bool:
         assert volume_exists(client, pool_name, volume_name)
         logger.debug(f"Volume created at: {volume_full_path}")
         test_context["full_volume_path"] = volume_full_path
-        return True
+        return None
     except Exception as e:
         logger.error(f"Error during volume creation: {e}")
         raise

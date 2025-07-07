@@ -1,5 +1,7 @@
-from src.api.volume_endpoints import logger
+import logging
 from tests.e2e.test_list_volumes import test_list_volumes
+
+logger = logging.getLogger(__name__)
 
 def pool_exists(client, pool_name: str) -> bool:
     """

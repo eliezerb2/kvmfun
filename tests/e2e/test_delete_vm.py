@@ -1,5 +1,8 @@
-from src.api.vm_endpoints import logger
+
+import logging
 from tests.e2e.utils import vm_exists
+
+logger = logging.getLogger(__name__)
 
 def test_delete_vm(client, vm_name):
     """
