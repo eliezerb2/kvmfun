@@ -1,12 +1,17 @@
 import xml.etree.ElementTree as ET
 import logging
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 from src.utils.libvirt_utils import parse_domain_xml, NAMESPACES, LIBVIRT_DOMAIN_NAMESPACE
-import libvirt
+import libvirt # type: ignore
+
 
 logger = logging.getLogger(__name__)
 
-def _create_disk_xml(qcow2_path: str, target_dev: str = None) -> str:
+KVMFUN_METADATA_NAMESPACE = "http://kvmfun.com/schemas/disk/1.0"
+KVMFUN_METADATA_PREFIX = "kvmfun"
+
+
+def _create_disk_xml(qcow2_path: str, target_dev: str = '', metadata: Optional[Dict[str, str]] = None) -> str:
     """
     Create disk XML for attachment.
 
@@ -14,6 +19,7 @@ def _create_disk_xml(qcow2_path: str, target_dev: str = None) -> str:
         qcow2_path (str): Path to the QCOW2 disk image file.
         target_dev (str, optional): Target device name (e.g., 'vdb').
             If not provided, the disk will be attached as the next available device.
+        metadata (Optional[Dict[str, str]], optional): Custom metadata to add to the disk.
 
     Returns:
         str: Disk XML as a string.
@@ -23,13 +29,22 @@ def _create_disk_xml(qcow2_path: str, target_dev: str = None) -> str:
     """
     logger.debug(f"Creating disk XML for '{qcow2_path}' as '{target_dev}'")
     ET.register_namespace('', LIBVIRT_DOMAIN_NAMESPACE)
+    ET.register_namespace(KVMFUN_METADATA_PREFIX, KVMFUN_METADATA_NAMESPACE)
     disk_element = ET.Element('disk', type='file', device='disk')
     ET.SubElement(disk_element, 'driver', name='qemu', type='qcow2', cache='none')
     ET.SubElement(disk_element, 'source', file=qcow2_path)
     target_kwargs = {'bus': 'virtio'}
-    if target_dev is not None:
+    if target_dev != '':
         target_kwargs['dev'] = target_dev
-    ET.SubElement(disk_element, 'target', **target_kwargs)
+    ET.SubElement(disk_element, 'target', attrib=target_kwargs)
+
+    if metadata:
+        metadata_element = ET.SubElement(disk_element, 'metadata')
+        for key, value in metadata.items():
+            meta_tag = f'{{{KVMFUN_METADATA_NAMESPACE}}}{key}'
+            meta_item = ET.SubElement(metadata_element, meta_tag)
+            meta_item.text = value
+
     disk_xml = ET.tostring(disk_element, encoding='unicode')
     logger.debug(f"Generated disk XML: {disk_xml}")
     return disk_xml

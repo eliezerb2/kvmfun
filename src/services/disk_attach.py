@@ -44,7 +44,9 @@ def attach_disk(dom: libvirt.virDomain, qcow2_path: str, target_dev: str) -> boo
         if _check_disk_conflicts(dom, qcow2_path, target_dev):
             return True  # Already attached
         
-        disk_xml = _create_disk_xml(qcow2_path, target_dev)
+        # Add custom metadata to the disk XML
+        disk_metadata = {"status": "open for write"}
+        disk_xml = _create_disk_xml(qcow2_path, target_dev, metadata=disk_metadata)
         
         flags = (libvirt.VIR_DOMAIN_ATTACH_DEVICE_LIVE | 
                 libvirt.VIR_DOMAIN_ATTACH_DEVICE_PERSIST | 

@@ -74,5 +74,11 @@ class Config:
     
     @property
     def VOLUME_ROUTER_PREFIX(self) -> str: return os.getenv("VOLUME_ROUTER_PREFIX", "")
+    
+    @property
+    def KVMFUN_METADATA_NAMESPACE(self) -> str: return os.getenv("KVMFUN_METADATA_NAMESPACE", "")
+    
+    @property
+    def KVMFUN_METADATA_PREFIX(self) -> str: return os.getenv("KVMFUN_METADATA_PREFIX", "")
 
 config = Config()
