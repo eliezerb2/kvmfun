@@ -98,3 +98,7 @@ appConfig:
   VM_ROUTER_PREFIX: "/vm"
   DISK_ROUTER_PREFIX: "/disk"
   VOLUME_ROUTER_PREFIX: "/volume"
+
+  # libvirt XML
+  KVMFUN_METADATA_NAMESPACE: "http://kvmfun.com/schemas/disk/1.0"
+  KVMFUN_METADATA_PREFIX: "kvmfun"
