@@ -43,6 +43,7 @@ htmlcov/
 # Logs
 *.log
 build-deploy.log
+.logs
 
 # Helm chart dependencies
 **/charts/
