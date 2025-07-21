@@ -1,5 +1,5 @@
-
 import logging
+import json
 from tests.e2e.utils import vm_exists
 
 logger = logging.getLogger(__name__)
@@ -7,9 +7,11 @@ logger = logging.getLogger(__name__)
 def test_delete_vm(client, vm_name):
     """
     Test deleting a VM by its name.
+
     Args:
         client: HTTP client for making requests
         vm_name: Name of the VM to delete
+
     Returns:
         bool: True if deletion was successful, False otherwise
     """
@@ -26,9 +28,9 @@ def test_delete_vm(client, vm_name):
     try:
         # Attempt to delete the VM
         logger.info(f"VM '{vm_name}' does exist")
-        response = client.delete(f"/api/v1/vm/delete/{vm_name}")
-        logger.debug(f"Delete VM response: {response.status_code} {response.json()}")
-        assert response.status_code == 200
+        delete_vm_response = client.delete(f"/api/v1/vm/delete/{vm_name}")
+        logger.debug(f"Delete VM response: {delete_vm_response.status_code}\n{json.dumps(delete_vm_response.json(), indent=4)}")
+        assert delete_vm_response.status_code == 200
         assert not vm_exists(client, vm_name)
         return True
     except Exception as e:
