@@ -16,13 +16,20 @@ spec:
     - name: pytest
       image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
       imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
-      command: ["pytest", "-v", "tests/e2e", "-s"]
+      command: ["tests/scripts/run-pytest.sh"]
       volumeMounts:
         {{- include "kvmfun.pod.volumeMounts" . | nindent 8 }}
+        - name: test-list
+          mountPath: /etc/test-list
       envFrom:
         - configMapRef:
             name: {{ include "kvmfun.fullname" . }}-env
+        - configMapRef:
+            name: {{ include "kvmfun.fullname" . }}-test-env
   volumes:
     {{- include "kvmfun.pod.volumes" . | nindent 4 }}
+    - name: test-list
+      configMap:
+        name: {{ include "kvmfun.fullname" . }}-test-list
   restartPolicy: Never
 {{- end }}
