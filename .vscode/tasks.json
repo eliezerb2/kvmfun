@@ -25,6 +25,22 @@
             },
             "problemMatcher": []
         },
+        {
+            "label": "Clean Logs",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                "${workspaceFolder}/.vscode/clean-logs.ps1"
+            ],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            }
+        },
         { "label": "Uninstall",
             "type": "shell",
             "command": "powershell",
