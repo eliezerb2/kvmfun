@@ -4,7 +4,7 @@ from unittest.mock import Mock
 import libvirt # type: ignore
 import logging
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 from src.main import app
 from src.utils.libvirt_utils import get_connection_dependency

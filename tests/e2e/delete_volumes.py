@@ -3,7 +3,7 @@ import json
 from tests.e2e.utils import get_volume_path
 
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 def test_delete_volumes(client, pool_name: str, volumes: dict) -> None:
     """

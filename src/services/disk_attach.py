@@ -2,11 +2,11 @@ import libvirt # type: ignore
 import logging
 import time
 from src.services.disk_utils import _check_disk_conflicts, _create_disk_xml
+from src.utils.libvirt_utils import parse_domain_xml
 from src.utils.config import config
-from src.utils.libvirt_utils import parse_domain_xml, NAMESPACES
 from src.utils.validation_utils import validate_qcow2_path
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 def _confirm_attachment(dom: libvirt.virDomain, qcow2_path: str, target_dev: str) -> bool:
     """Confirm disk attachment by polling VM configuration."""
@@ -17,9 +17,9 @@ def _confirm_attachment(dom: libvirt.virDomain, qcow2_path: str, target_dev: str
         logger.debug(f"Confirmation attempt {attempt + 1}/{config.DISK_ATTACH_CONFIRM_RETRIES}")
         root = parse_domain_xml(dom, live=True)
         
-        for disk in root.findall(".//lib:disk", NAMESPACES):
-            target = disk.find('lib:target', NAMESPACES)
-            source = disk.find('lib:source', NAMESPACES)
+        for disk in root.findall(".//devices/disk"):
+            target = disk.find("target")
+            source = disk.find("source")
             if (target is not None and target.get('dev') == target_dev and
                 source is not None and source.get('file') == qcow2_path):
                 logger.info(f"Successfully confirmed disk attachment - VM: '{vm_name}', Device: '{target_dev}', Attempt: {attempt + 1}")
@@ -34,10 +34,13 @@ def _confirm_attachment(dom: libvirt.virDomain, qcow2_path: str, target_dev: str
 
 def attach_disk(dom: libvirt.virDomain, qcow2_path: str, target_dev: str) -> bool:
     """Attach disk to running VM."""
-    vm_name = dom.name()
+    vm_name: str = dom.name()
     logger.info(f"Starting disk attachment - VM: '{vm_name}', Path: '{qcow2_path}', Target: '{target_dev}'")
     
+    # TODO: move the logic for getting next available device from endpoint to here
+    
     try:
+        # TODO: do we need this?
         validate_qcow2_path(qcow2_path)
         logger.debug(f"Disk file validation passed: {qcow2_path}")
         
@@ -45,12 +48,14 @@ def attach_disk(dom: libvirt.virDomain, qcow2_path: str, target_dev: str) -> boo
             return True  # Already attached
         
         # Add custom metadata to the disk XML
-        disk_metadata = {"status": "open for write"}
-        disk_xml = _create_disk_xml(qcow2_path, target_dev, metadata=disk_metadata)
+        disk_metadata: dict = {"status": "open for write"}
         
-        flags = (libvirt.VIR_DOMAIN_ATTACH_DEVICE_LIVE | 
-                libvirt.VIR_DOMAIN_ATTACH_DEVICE_PERSIST | 
-                libvirt.VIR_DOMAIN_ATTACH_DEVICE_CONFIG)
+        # TODO: add metadata!!!!!
+        disk_xml: str = _create_disk_xml(qcow2_path, target_dev)
+                                        #  , metadata=disk_metadata)
+        logger.debug(f"Attach disk XML:\n{disk_xml}")
+        
+        flags: int = libvirt.VIR_DOMAIN_AFFECT_LIVE | libvirt.VIR_DOMAIN_AFFECT_CONFIG
         
         logger.debug(f"Executing disk attachment with flags: {flags}")
         dom.attachDeviceFlags(disk_xml, flags)

@@ -1,3 +1,4 @@
+import textwrap
 import xml.etree.ElementTree as ET
 import logging
 from typing import List, Dict, Any, Optional
@@ -5,13 +6,13 @@ from src.utils.libvirt_utils import parse_domain_xml, NAMESPACES, LIBVIRT_DOMAIN
 import libvirt # type: ignore
 
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 KVMFUN_METADATA_NAMESPACE = "http://kvmfun.com/schemas/disk/1.0"
 KVMFUN_METADATA_PREFIX = "kvmfun"
 
 
-def _create_disk_xml(qcow2_path: str, target_dev: str = '', metadata: Optional[Dict[str, str]] = None) -> str:
+def _create_disk_xml(qcow2_path: str, target_dev: str, metadata: Optional[Dict[str, str]] = None) -> str:
     """
     Create disk XML for attachment.
 
@@ -28,6 +29,24 @@ def _create_disk_xml(qcow2_path: str, target_dev: str = '', metadata: Optional[D
         ValueError: If disk conflicts are detected or creation fails.
     """
     logger.debug(f"Creating disk XML for '{qcow2_path}' as '{target_dev}'")
+
+    # TODO: add parameters for all attributes
+
+    # TODO: TEMP until adding metadata!!!!! 
+    disk_xml = textwrap.dedent(f"""
+            <disk type='file' device='disk'>
+                <driver name='qemu' type='qcow2' cache='none'/>
+                <source file='{qcow2_path}' index='2'/>
+                <target dev='{target_dev}' bus='scsi'/>
+                <alias name='virtio-disk1'/>
+                <address type='drive' controller='0' bus='0' target='0' unit='1'/>
+                <removable state='on'/>
+            </disk>
+        """)
+    return disk_xml   
+
+    
+    
     ET.register_namespace('', LIBVIRT_DOMAIN_NAMESPACE)
     ET.register_namespace(KVMFUN_METADATA_PREFIX, KVMFUN_METADATA_NAMESPACE)
     disk_element = ET.Element('disk', type='file', device='disk')
@@ -45,8 +64,13 @@ def _create_disk_xml(qcow2_path: str, target_dev: str = '', metadata: Optional[D
             meta_item = ET.SubElement(metadata_element, meta_tag)
             meta_item.text = value
 
+    # Indent the XML tree to make it readable in logs.
+    # This is safe as libvirt's parser ignores insignificant whitespace.
+    ET.indent(disk_element, space="  ")
+    
     disk_xml = ET.tostring(disk_element, encoding='unicode')
-    logger.debug(f"Generated disk XML: {disk_xml}")
+    logger.debug(f"Generated disk XML:\n{disk_xml}")
+    
     return disk_xml
 
 def _check_disk_conflicts(dom: libvirt.virDomain, qcow2_path: str, target_dev: str) -> bool:
@@ -55,9 +79,9 @@ def _check_disk_conflicts(dom: libvirt.virDomain, qcow2_path: str, target_dev: s
     logger.debug(f"Checking disk conflicts for VM '{vm_name}', device '{target_dev}'")
     root = parse_domain_xml(dom, live=True)
     
-    for disk in root.findall(".//lib:disk", NAMESPACES):
-        target = disk.find('lib:target', NAMESPACES)
-        source = disk.find('lib:source', NAMESPACES)
+    for disk in root.findall(".//devices/disk"):
+        target = disk.find("target")
+        source = disk.find("source")
         
         if target is not None and target.get('dev') == target_dev:
             existing_source = source.get('file') if source is not None else 'unknown'
@@ -77,6 +101,7 @@ def _check_disk_conflicts(dom: libvirt.virDomain, qcow2_path: str, target_dev: s
     logger.debug(f"No disk conflicts found for VM '{vm_name}'")
     return False
 
+# TODO: do we need this?
 def find_disk_by_target(root: ET.Element, target_dev: str) -> ET.Element:
     """
     Find disk element by target device name.
@@ -91,13 +116,14 @@ def find_disk_by_target(root: ET.Element, target_dev: str) -> ET.Element:
     Raises:
         ValueError: If disk not found
     """
-    for disk in root.findall(".//lib:disk", NAMESPACES):
-        target = disk.find('lib:target', NAMESPACES)
+    for disk in root.findall(".//devices/disk"):
+        target = disk.find("target")
         if target is not None and target.get('dev') == target_dev:
             return disk
     
     raise ValueError(f"Disk with target '{target_dev}' not found")
 
+# TODO: do we need this?
 def get_used_device_names(dom: libvirt.virDomain) -> set:
     """
     Get all currently used device names in a VM.
@@ -114,8 +140,8 @@ def get_used_device_names(dom: libvirt.virDomain) -> set:
     root = parse_domain_xml(dom, live=True)
     used_devices = set()
     
-    for disk in root.findall(".//lib:disk", NAMESPACES):
-        target = disk.find('lib:target', NAMESPACES)
+    for disk in root.findall(".//devices/disk"):
+        target = disk.find("target")
         if target is not None:
             dev = target.get('dev')
             if dev:
@@ -141,9 +167,9 @@ def list_vm_disks(dom: libvirt.virDomain) -> List[Dict[str, Any]]:
     root = parse_domain_xml(dom, live=True)
     disks = []
     
-    for disk in root.findall(".//lib:disk[@type='file']", NAMESPACES):
-        target = disk.find("lib:target", NAMESPACES)
-        source = disk.find("lib:source", NAMESPACES)
+    for disk in root.findall(".//devices/disk[@type='file']"):
+        target = disk.find("target")
+        source = disk.find("source")
         if target is not None and source is not None:
             disk_info = {
                 "target_dev": target.get("dev"),

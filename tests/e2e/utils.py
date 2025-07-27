@@ -2,7 +2,7 @@ import logging
 import json
 from tests.e2e.test_list_volumes import test_list_volumes
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 def pool_exists(client, pool_name: str) -> bool:
     """

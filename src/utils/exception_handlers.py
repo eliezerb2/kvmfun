@@ -1,9 +1,10 @@
-import libvirt
+import libvirt # type: ignore
 import logging
-from fastapi import Request, status
-from fastapi.responses import JSONResponse
+from fastapi import Request, status # type: ignore
+from fastapi.responses import JSONResponse # type: ignore
 
-logger = logging.getLogger(__name__)
+
+logger: logging.Logger = logging.getLogger(__name__)
 
 async def libvirt_error_handler(request: Request, exc: libvirt.libvirtError):
     """

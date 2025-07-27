@@ -1,6 +1,4 @@
 import os
-from typing import Optional
-
 
 class Config:
     """
@@ -37,11 +35,9 @@ class Config:
         return f"qemu+ssh://{self.LIBVIRT_SSH_USER}@{self.LIBVIRT_SERVER_ADDRESS}:{self.LIBVIRT_SERVER_PORT}/system"
 
     @property
-    def VIRTIO_DISK_PREFIX(self) -> str: return os.getenv("VIRTIO_DISK_PREFIX", "")
+    def MAX_SCSI_DEVICES(self) -> int: return int(os.getenv("MAX_SCSI_DEVICES", 0))
 
-    @property
-    def MAX_VIRTIO_DEVICES(self) -> int: return int(os.getenv("MAX_VIRTIO_DEVICES", 0))
-
+# TODO: in use?
     @property
     def QCOW2_DEFAULT_SIZE(self) -> str: return os.getenv("QCOW2_DEFAULT_SIZE", "")
 

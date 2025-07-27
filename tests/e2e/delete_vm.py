@@ -2,7 +2,7 @@ import logging
 import json
 from tests.e2e.utils import vm_exists
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 def test_delete_vm(client, vm_name):
     """

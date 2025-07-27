@@ -5,7 +5,7 @@ from tests.e2e.utils import get_volume_path
 from tests.config import config
 
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
 @pytest.mark.dependency(name="create_volumes")

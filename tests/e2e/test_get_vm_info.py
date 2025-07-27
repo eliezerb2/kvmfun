@@ -6,7 +6,7 @@ import xml.etree.ElementTree as ET
 # from tests.config import config
 
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 def test_get_vm_info(test_context) -> None:
     """

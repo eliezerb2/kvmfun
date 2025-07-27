@@ -1,16 +1,21 @@
 import libvirt # type: ignore
+import textwrap
 import xml.etree.ElementTree as ET
 import time
 import logging
+# import textwrap
 from typing import Optional
 from src.utils.config import config
 from src.utils.libvirt_utils import parse_domain_xml
+from src.utils.exceptions import DiskNotFound
+from src.services.disk_utils import _create_disk_xml
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 # Define XML namespaces used in libvirt domain XML
 NAMESPACES = {'lib': 'http://libvirt.org/schemas/domain/qemu/1.0'}
 
+# TODO: do we need this?
 def get_disk_xml_for_target_dev(dom: libvirt.virDomain, target_dev: str) -> str:
     """
     Extract XML description of specific disk from VM's domain XML.
@@ -67,6 +72,46 @@ def get_disk_xml_for_target_dev(dom: libvirt.virDomain, target_dev: str) -> str:
         logger.error(f"Unexpected error retrieving disk XML for VM '{vm_name}', device '{target_dev}': {e}")
         raise
 
+def _get_disk_source_path(dom: libvirt.virDomain, target_dev: str) -> str:
+    """
+    Get the source file path for a disk by its target device.
+    
+    This function is crucial for creating a minimal XML for detachment,
+    as both the source path and target device are needed to uniquely
+    identify the disk for libvirt.
+    
+    Args:
+        dom: libvirt Domain object for the target VM
+        target_dev: Target device name to search for (e.g., 'vdb', 'vdc')
+        
+    Returns:
+        str: The source path of the disk file.
+
+    Raises:
+        DiskNotFound: If a disk with the specified target device is not found.
+        ValueError: If the found disk is not a file-backed disk.
+    """
+    vm_name = dom.name()
+    logger.debug(f"Retrieving source path for device '{target_dev}' in VM '{vm_name}'")
+    
+    root = parse_domain_xml(dom, live=True)
+    for disk_element in root.findall(".//devices/disk"):
+        target_element = disk_element.find("target")
+        if target_element is not None and target_element.get("dev") == target_dev:
+            source_element = disk_element.find("source")
+            if source_element is not None and source_element.get("file"):
+                source_path = source_element.get("file")
+                if source_path:
+                    logger.debug(f"Found source path '{source_path}' for device '{target_dev}'")
+                    return source_path
+                else:
+                    logger.debug(f"Source path not found for device '{target_dev}'")
+                    raise ValueError(f"Source path not found for device '{target_dev}'")
+            else:
+                raise ValueError(f"Disk '{target_dev}' is not a file-backed disk")
+    
+    raise DiskNotFound(f"Disk with target '{target_dev}' not found in VM '{vm_name}'")
+
 def poll_for_disk_removal(dom: libvirt.virDomain, target_dev: str, timeout: Optional[int] = None) -> bool:
     """
     Poll VM's live XML to confirm disk removal.
@@ -99,21 +144,15 @@ def poll_for_disk_removal(dom: libvirt.virDomain, target_dev: str, timeout: Opti
     try:
         for attempt in range(max_retries):
             logger.debug(f"Polling attempt {attempt + 1}/{max_retries} for disk '{target_dev}' removal")
-            
-            root_live = parse_domain_xml(dom, live=True)
-            
-            disk_found = False
-            for disk_elem_live in root_live.findall(".//disk"):
-                target_elem_live = disk_elem_live.find("target")
-                if target_elem_live is not None and target_elem_live.get("dev") == target_dev:
-                    disk_found = True
-                    logger.debug(f"Disk '{target_dev}' still present in VM '{vm_name}' configuration")
-                    break
-            
-            if not disk_found:
+            try:
+                # If _get_disk_source_path finds the device, it's still attached.
+                _get_disk_source_path(dom, target_dev)
+                logger.debug(f"Disk '{target_dev}' still present in VM '{vm_name}' configuration")
+            except DiskNotFound:
+                # If the disk is not found, it has been successfully detached.
                 logger.info(f"Successfully confirmed disk '{target_dev}' removed from VM '{vm_name}' (attempt {attempt + 1})")
                 return True
-            
+
             if attempt < max_retries - 1:  # Don't sleep on the last attempt
                 logger.debug(f"Disk '{target_dev}' still present, waiting {config.DISK_DETACH_POLL_INTERVAL}s before retry")
                 time.sleep(config.DISK_DETACH_POLL_INTERVAL)
@@ -127,7 +166,8 @@ def poll_for_disk_removal(dom: libvirt.virDomain, target_dev: str, timeout: Opti
     except Exception as e:
         logger.error(f"Unexpected error during disk removal polling for VM '{vm_name}', device '{target_dev}': {e}")
         return False
-
+    
+   
 def _validate_vm_for_detach(dom: libvirt.virDomain) -> None:
     """Validate VM is running and ready for hot-detach."""
     vm_name = dom.name()
@@ -139,27 +179,44 @@ def _validate_vm_for_detach(dom: libvirt.virDomain) -> None:
         logger.error(error_msg)
         raise ValueError(error_msg)
 
+
 def detach_disk(conn: libvirt.virConnect, vm_name: str, target_dev: str) -> bool:
-    """Detach disk from running VM."""
+    """Detach disk from running VM.
+    
+    Args:
+        conn: libvirt connection
+        vm_name: Name of the VM
+        target_dev: Target device name to detach (e.g., 'vdb')
+        
+    Returns:
+        bool: True if detachment was successful
+        
+    Raises:
+        RuntimeError: If disk detachment fails
+    """
     logger.info(f"Starting disk detachment - VM: '{vm_name}', Device: '{target_dev}'")
+    
+    try:
+        # Let libvirtError (e.g., VM not found) propagate to the global handler.
+        # Let ValueError/DiskNotFound propagate to the API route handler.
+        dom: libvirt.virDomain = conn.lookupByName(vm_name)
+        _validate_vm_for_detach(dom)
+        logger.debug(f"Retrieving source path for device '{target_dev}'")
+        source_path: str = _get_disk_source_path(dom, target_dev)
+        disk_xml = _create_disk_xml(source_path, target_dev)    
+        logger.debug(f"Using the following disk XML:\n{disk_xml}")
+        flags = libvirt.VIR_DOMAIN_AFFECT_LIVE | libvirt.VIR_DOMAIN_AFFECT_CONFIG
+        dom.detachDeviceFlags(disk_xml, flags)
+        logger.info(f"Detachment with flags executed successfully")
+    except libvirt.libvirtError as e:
+        logger.error(f"Detachment failed: {e}")
+        raise RuntimeError(f"Failed to detach disk '{target_dev}' from VM '{vm_name}': {e}")
 
-    # Let libvirtError (e.g., VM not found) propagate to the global handler.
-    # Let ValueError/DiskNotFound propagate to the API route handler.
-    dom = conn.lookupByName(vm_name)
-    _validate_vm_for_detach(dom)
-
-    logger.debug(f"Retrieving disk XML for device '{target_dev}'")
-    disk_xml = get_disk_xml_for_target_dev(dom, target_dev)
-    logger.info(f"Successfully retrieved disk XML for detachment")
-    logger.debug(f"Disk XML to detach: {disk_xml}")
-
-    flags = libvirt.VIR_DOMAIN_AFFECT_LIVE | libvirt.VIR_DOMAIN_AFFECT_CONFIG
-    dom.detachDeviceFlags(disk_xml, flags)
-    logger.info(f"Disk detachment command executed for VM '{vm_name}', device '{target_dev}'")
-
-    logger.debug(f"Starting detachment confirmation polling")
-    if not poll_for_disk_removal(dom, target_dev):
-        raise RuntimeError(f"Disk '{target_dev}' failed to detach within timeout ({config.DISK_DETACH_TIMEOUT}s)")
-
-    logger.info(f"Successfully detached and confirmed removal of disk '{target_dev}' from VM '{vm_name}'")
+    # Verify the disk was actually detached
+    if not poll_for_disk_removal(dom, target_dev, timeout=10):
+        error_msg = f"Disk '{target_dev}' still attached to VM '{vm_name}' after detachment commands"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
+    
+    logger.info(f"Successfully verified disk '{target_dev}' was detached from VM '{vm_name}'")
     return True

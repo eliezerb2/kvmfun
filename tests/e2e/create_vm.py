@@ -6,7 +6,7 @@ from tests.config import config
 from tests.e2e.test_get_vm_info import test_get_vm_info
 
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 @pytest.mark.e2e
 @pytest.mark.dependency(name="create_vm")

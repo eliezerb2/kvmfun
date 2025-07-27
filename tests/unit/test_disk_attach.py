@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
-from src.services.disk_attach import _letters_to_int, _int_to_letters, get_next_available_virtio_dev
+from src.services.disk_attach import _letters_to_int, _int_to_letters, get_next_available_scsi_dev
 
 def test_letters_to_int():
     """Test letter to integer conversion."""
@@ -26,5 +26,5 @@ def test_get_next_available_virtio_dev(mock_fromstring):
     mock_root.findall.return_value = []
     mock_fromstring.return_value = mock_root
     
-    result = get_next_available_virtio_dev(mock_dom)
+    result = get_next_available_scsi_dev(mock_dom)
     assert result == 'vda'
