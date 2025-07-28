@@ -90,6 +90,8 @@ async def attach_disk_endpoint(request: AttachDiskRequest, conn: libvirt.virConn
         dom = conn.lookupByName(request.vm_name)
         logger.info(f"Successfully connected to VM '{request.vm_name}'")
         
+        # TODO: add an optional target dev parameter to the request
+        # TODO: move the logic for getting next available device to the service layer
         target_dev: str = get_next_available_scsi_dev(dom)
         logger.info(f"Auto-assigned target device: {target_dev}")
         

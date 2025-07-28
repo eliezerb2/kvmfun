@@ -33,45 +33,47 @@ def _create_disk_xml(qcow2_path: str, target_dev: str, metadata: Optional[Dict[s
     # TODO: add parameters for all attributes
 
     # TODO: TEMP until adding metadata!!!!! 
-    disk_xml = textwrap.dedent(f"""
-            <disk type='file' device='disk'>
-                <driver name='qemu' type='qcow2' cache='none'/>
-                <source file='{qcow2_path}' index='2'/>
-                <target dev='{target_dev}' bus='scsi'/>
-                <alias name='virtio-disk1'/>
-                <address type='drive' controller='0' bus='0' target='0' unit='1'/>
-                <removable state='on'/>
-            </disk>
-        """)
-    return disk_xml   
+    # disk_xml = textwrap.dedent(f"""
+    #         <disk type='file' device='disk'>
+    #             <driver name='qemu' type='qcow2' cache='none'/>
+    #             <source file='{qcow2_path}' index='2'/>
+    #             <target dev='{target_dev}' bus='scsi'/>
+    #             <alias name='virtio-disk1'/>
+    #             <address type='drive' controller='0' bus='0' target='0' unit='1'/>
+    #             <removable state='on'/>
+    #         </disk>
+    #     """)
+    # return disk_xml   
 
     
-    
-    ET.register_namespace('', LIBVIRT_DOMAIN_NAMESPACE)
-    ET.register_namespace(KVMFUN_METADATA_PREFIX, KVMFUN_METADATA_NAMESPACE)
-    disk_element = ET.Element('disk', type='file', device='disk')
-    ET.SubElement(disk_element, 'driver', name='qemu', type='qcow2', cache='none')
-    ET.SubElement(disk_element, 'source', file=qcow2_path)
-    target_kwargs = {'bus': 'virtio'}
-    if target_dev != '':
-        target_kwargs['dev'] = target_dev
-    ET.SubElement(disk_element, 'target', attrib=target_kwargs)
+    try:
+        ET.register_namespace('', LIBVIRT_DOMAIN_NAMESPACE)
+        # ET.register_namespace(KVMFUN_METADATA_PREFIX, KVMFUN_METADATA_NAMESPACE)
+        disk_element: ET.Element = ET.Element('disk', type='file', device='disk')
+        ET.SubElement(disk_element, 'driver', name='qemu', type='qcow2', cache='none')
+        ET.SubElement(disk_element, 'source', file=qcow2_path, index='2')
+        ET.SubElement(disk_element, 'target', dev=target_dev, bus='scsi')
+        ET.SubElement(disk_element, 'alias', name='virtio-disk1')
+        ET.SubElement(disk_element, 'address', type='drive', controller='0', bus='0', target='0', unit='1')
+        ET.SubElement(disk_element, 'removable', state='on')
+        # if metadata:
+        #     metadata_element = ET.SubElement(disk_element, 'metadata')
+        #     for key, value in metadata.items():
+        #         meta_tag = f'{{{KVMFUN_METADATA_NAMESPACE}}}{key}'
+        #         meta_item = ET.SubElement(metadata_element, meta_tag)
+        #         meta_item.text = value
+        # Indent the XML tree to make it readable in logs.
+        ET.indent(disk_element, space="  ")
+        disk_xml: str = ET.tostring(disk_element, encoding='unicode')
+        logger.debug(f"Generated disk XML:\n{disk_xml}")
+        return disk_xml
+    except ET.ParseError as e:
+        logger.error(f"Failed to parse disk XML: {e}")
+        raise ValueError(f"Failed to parse disk XML: {e}")
+    except Exception as e:
+        logger.error(f"Unexpected error creating disk XML: {e}")
+        raise ValueError(f"Unexpected error creating disk XML: {e}")
 
-    if metadata:
-        metadata_element = ET.SubElement(disk_element, 'metadata')
-        for key, value in metadata.items():
-            meta_tag = f'{{{KVMFUN_METADATA_NAMESPACE}}}{key}'
-            meta_item = ET.SubElement(metadata_element, meta_tag)
-            meta_item.text = value
-
-    # Indent the XML tree to make it readable in logs.
-    # This is safe as libvirt's parser ignores insignificant whitespace.
-    ET.indent(disk_element, space="  ")
-    
-    disk_xml = ET.tostring(disk_element, encoding='unicode')
-    logger.debug(f"Generated disk XML:\n{disk_xml}")
-    
-    return disk_xml
 
 def _check_disk_conflicts(dom: libvirt.virDomain, qcow2_path: str, target_dev: str) -> bool:
     """Check if disk is already attached or conflicts exist."""
