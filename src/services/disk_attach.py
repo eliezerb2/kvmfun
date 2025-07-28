@@ -50,9 +50,7 @@ def attach_disk(dom: libvirt.virDomain, qcow2_path: str, target_dev: str) -> boo
         # Add custom metadata to the disk XML
         disk_metadata: dict = {"status": "open for write"}
         
-        # TODO: add metadata!!!!!
-        disk_xml: str = _create_disk_xml(qcow2_path, target_dev)
-                                        #  , metadata=disk_metadata)
+        disk_xml: str = _create_disk_xml(qcow2_path, target_dev, metadata=disk_metadata)
         logger.debug(f"Attach disk XML:\n{disk_xml}")
         
         flags: int = libvirt.VIR_DOMAIN_AFFECT_LIVE | libvirt.VIR_DOMAIN_AFFECT_CONFIG
