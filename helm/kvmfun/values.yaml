@@ -59,6 +59,8 @@ tests:
     repository: kvmfun-test
     pullPolicy: IfNotPresent
     tag: "latest"
+  # Path to test list file (relative to chart root)
+  testList: "test_lists/default.yaml"
 
 # Application configuration, mounted as environment variables from a ConfigMap.
 appConfig:
@@ -79,9 +81,8 @@ appConfig:
   LIBVIRT_SSH_KEY_TYPE: "ed25519"
 
   # DISK MANAGEMENT CONFIGURATION
-  VIRTIO_DISK_PREFIX: "vd"
-  MAX_VIRTIO_DEVICES: "702"
   QCOW2_DEFAULT_SIZE: "1G"
+  MAX_SCSI_DEVICES: "26"
 
   # OPERATION TIMEOUTS AND RETRIES
   DISK_ATTACH_CONFIRM_RETRIES: "5"
@@ -98,3 +99,17 @@ appConfig:
   VM_ROUTER_PREFIX: "/vm"
   DISK_ROUTER_PREFIX: "/disk"
   VOLUME_ROUTER_PREFIX: "/volume"
+
+  # libvirt XML
+  KVMFUN_METADATA_NAMESPACE: "http://kvmfun.com/schemas/disk/1.0"
+  KVMFUN_METADATA_PREFIX: "kvmfun"
+
+testConfig:
+  TEST_VM_VCPUS: "1"
+  TEST_VM_MEMORY_MB: "1024"
+  TEST_VM_NAME: "ubuntu-test-vm"
+  TEST_VM_NETWORK_NAME: "default"
+  TEST_DATA_VOLUME_NAME: "e2e-test-data-vol.qcow2"
+  TEST_DATA_VOLUME_SIZE_GB: "1"
+  TEST_CLEANUP_ON_START: "true"
+  TEST_CLEANUP_ON_END: "true"

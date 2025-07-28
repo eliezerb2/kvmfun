@@ -1,14 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException # type: ignore
 import libvirt # type: ignore
 import logging
-from src.schemas.base_schemas import BaseVMRequest
 from src.schemas.create_vm_request import CreateVMRequest
 from src.utils.libvirt_utils import get_connection_dependency
-from src.services.vm_services import create_vm, delete_vm, start_vm, stop_vm
+from src.services.vm_services import create_vm, delete_vm, get_vm_info, start_vm, stop_vm, list_vms
 from src.utils.config import config
 from src.utils.constants import COMMON_API_RESPONSES
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 router = APIRouter(
     prefix=config.VM_ROUTER_PREFIX, 
     tags=["vm"],
@@ -16,6 +15,46 @@ router = APIRouter(
         **COMMON_API_RESPONSES,
         }
     )
+
+@router.post("/get_info/{vm_name}",
+             summary="Get VM information",
+             description="Retrieve information about a virtual machine by its name.",
+             )
+async def get_vm_info_endpoint(vm_name: str, conn: libvirt.virConnect = Depends(get_connection_dependency)):
+    """
+    Retrieve information about a virtual machine by its name.
+
+    This endpoint retrieves detailed information about a VM, including its name, UUID, state, memory, vCPU count, and disk path.
+
+    Args:
+        vm_name (str): Name of the VM to retrieve information for.
+        conn (libvirt.virConnect): Connection to the libvirt hypervisor.
+
+    Returns:
+        dict: Information about the VM.
+
+    Raises:
+        HTTPException: 404 if the VM is not found.
+        HTTPException: 500 for server errors
+    """
+    try:
+        domain = conn.lookupByName(vm_name)
+        if domain is None:
+            raise HTTPException(status_code=404, detail="VM not found")
+
+        info = get_vm_info(vm_name, conn)
+        return {
+            "name": info["name"],
+            "uuid": info["uuid"],
+            "state": info["state"],
+            "memory": info["memory"],
+            "vcpu_count": info["vcpu_count"],
+            "disks": info["disks"],
+            "network_name": info["network_name"],
+        }
+    except libvirt.libvirtError as e:
+        logger.error(f"Libvirt error while getting VM info: {repr(e)}", exc_info=True)
+        raise HTTPException(status_code=500)
 
 @router.get("/list",
             summary="List all virtual machines",
@@ -37,18 +76,8 @@ async def list_vms_endpoint(conn: libvirt.virConnect = Depends(get_connection_de
         HTTPException: 500 for server errors
     """
     try:
-        vms = conn.listAllDomains(0)
-        vm_list = []
-        for vm in vms:
-            vm_info = vm.info()
-            vm_list.append({
-                "name": vm.name(),
-                "uuid": vm.UUIDString(),
-                "state": vm_info[0],
-                "max_memory": vm_info[1],
-                "max_vcpus": vm_info[2]
-            })
-        return {"vms": vm_list}
+        vms: list = list_vms(conn)
+        return {"vms": vms}
     except libvirt.libvirtError as e:
         logger.error(f"Libvirt error while listing VMs: {repr(e)}", exc_info=True)
         raise HTTPException(status_code=500)

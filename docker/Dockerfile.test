@@ -4,6 +4,11 @@ FROM kvmfun
 WORKDIR /app
 USER root
 
+# Install jq for parsing JSON in test scripts.
+# apt-get update is required because the base image cleans up the package lists
+# to save space. We must refresh them before installing new packages.
+RUN apt-get update && apt-get install -y --no-install-recommends jq && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Install pytest in addition to application requirements.
 RUN pip install --no-cache-dir pytest pytest-cov "httpx<0.24.0"
 
@@ -12,6 +17,8 @@ ENV PYTHONPATH=/app
 
 # Copy tests into the container.
 COPY tests/ ./tests/
+
+RUN chmod +x tests/scripts/run-pytest.sh
 
 # Set the default command to run tests with verbose output.
 CMD ["pytest", "-v"]

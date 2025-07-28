@@ -2,7 +2,7 @@ import libvirt #type: ignore
 import logging
 import textwrap
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 
 def create_volume(
     conn: libvirt.virConnect, 
@@ -31,7 +31,7 @@ def create_volume(
     """
     logger.info(f"Creating volume '{vol_name}' in pool '{pool_name}' with size {size_gb}GB.")
     try:
-        pool = conn.storagePoolLookupByName(pool_name)
+        pool: libvirt.virStoragePool = conn.storagePoolLookupByName(pool_name)
     except libvirt.libvirtError as e:
         logger.error(f"Storage pool '{pool_name}' not found: {e}")
         raise ValueError(f"Storage pool '{pool_name}' not found.")
@@ -55,8 +55,8 @@ def create_volume(
 
     try:
         # Use libvirt's storageVolCreateXML to create the disk remotely
-        vol = pool.createXML(vol_xml, 0)
-        path = vol.path()
+        vol: libvirt.virStorageVol = pool.createXML(vol_xml, 0)
+        path: str = vol.path()
         logger.info(f"Successfully created volume '{vol.name()}' at path: {path}")
         return path
     except libvirt.libvirtError as e:

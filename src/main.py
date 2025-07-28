@@ -11,9 +11,10 @@ logging.basicConfig(
     level=getattr(logging, config.LOG_LEVEL.upper()),
     format=config.LOG_FORMAT
 )
-logger = logging.getLogger(__name__)
 
-app = FastAPI(
+logger: logging.Logger = logging.getLogger(__name__)
+
+app: FastAPI = FastAPI(
     title=config.APP_TITLE, 
     version=config.APP_VERSION,
     debug=config.DEBUG

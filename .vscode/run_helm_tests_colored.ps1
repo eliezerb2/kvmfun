@@ -1,24 +1,48 @@
 # .vscode/run_helm_tests_colored.ps1
 
-# 1. Set execution policy for THIS PROCESS only.
-# This ensures that HighlightOutput.ps1 can be executed.
+param(
+    # Make the release name a parameter for reusability. Default to 'kvmfun'.
+    [string]$ReleaseName,
+    [string]$TestPodName,
+    [string]$LogFolderName = ".logs",
+    [string]$LogFileNamePrefix = "tests",
+    [string]$LogFileExtenstion = "log"
+)
+
+# Set execution policy for THIS PROCESS only.
 Set-ExecutionPolicy -Scope Process Bypass -Force
 
-# Get the directory of this script (run_helm_tests_colored.ps1)
-# to reliably find HighlightOutput.ps1 (assuming it's in the same folder).
+# Get the directory of this script and the workspace root to create a .logs folder
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$highlightScriptPath = Join-Path $scriptDir "HighlightOutput.ps1"
+$workspaceRoot = (Resolve-Path (Join-Path $scriptDir '..')).Path
 
-# Basic check to ensure the highlighting script exists
-if (-not (Test-Path $highlightScriptPath)) {
-    Write-Error "Error: Highlighting script not found at $highlightScriptPath. Please ensure it's in the same .vscode folder."
-    exit 1
+# Set up logging to a file in a .logs directory
+$logsDir = Join-Path $workspaceRoot $LogFolderName
+if (-not (Test-Path $logsDir)) {
+    New-Item -ItemType Directory -Path $logsDir | Out-Null
+}
+$timestamp = Get-Date -Format 'yyyy-MM-dd_HH-mm-ss'
+$logFileName = "$LogFileNamePrefix-$timestamp.$LogFileExtenstion"
+$logFilePath = Join-Path $logsDir $logFileName
+Write-Host "Logging test output to: $logFilePath" -ForegroundColor Cyan
+
+Write-Host "Running Helm tests for release: '$ReleaseName' and streaming logs..." -ForegroundColor Cyan
+helm test $ReleaseName 
+
+# Get the name of the test pod
+$testPodName = "$($ReleaseName)-$($TestPodName)"
+
+# Retrieve the logs
+Write-Host "`n--- Full Raw Log for Pod: $testPodName ---" -ForegroundColor Cyan
+
+# Check if the pod exists before trying to fetch logs. This avoids errors if the pod was deleted.
+$podCheck = kubectl get pod $testPodName -o name --ignore-not-found
+if ($podCheck) {
+    kubectl logs $testPodName | Out-File -FilePath $logFilePath
+} else {
+    Write-Warning "Could not find the test pod '$testPodName' after the test run. It might have been deleted by its 'hook-delete-policy'."
+    "No test pod found: $testPodName" | Out-File -FilePath $logFilePath
 }
 
-# 2. Execute 'helm test' and directly pipe its output to ForEach-Object.
-# This avoids Invoke-Expression for the pipeline, ensuring $_ is correctly populated.
-helm test kvmfun --logs | ForEach-Object {
-    # Here, $_ correctly represents the current line from the pipeline.
-    # Call your HighlightOutput.ps1 script with the current line.
-    & $highlightScriptPath -Line $_
-}
+# Open the log file in VS Code
+code $logFilePath

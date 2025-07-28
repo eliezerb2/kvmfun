@@ -10,7 +10,7 @@ from src.schemas.create_volume_request import CreateVolumeRequest  # Adjust the 
 from src.utils.constants import COMMON_API_RESPONSES
 from src.utils.libvirt_utils import get_connection_dependency  # Make sure this import path is correct
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 router = APIRouter(
     prefix=config.VOLUME_ROUTER_PREFIX + "/{pool_name}",
     tags=["volume"],

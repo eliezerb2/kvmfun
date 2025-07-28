@@ -1,0 +1,29 @@
+{{- if .Values.tests.enabled -}}
+{{- /*
+First, validate the path and file content.
+This logic does not render any output but will fail the template
+generation if the conditions are not met, providing a clear error.
+*/}}
+{{- $filePath := .Values.tests.testList -}}
+{{- if not $filePath -}}
+  {{- fail "ERROR: .Values.tests.testList is required but was not provided in values." -}}
+{{- end -}}
+{{- $fileContent := .Files.Get $filePath -}}
+{{- if not $fileContent }}
+  {{- fail (printf "ERROR: The test list file '%s' is empty or could not be found." $filePath) -}}
+
+{{- end }}
+{{- /* Parse the YAML file. `fromYaml` will ignore commented lines. */}}
+{{- $testList := fromYaml $fileContent | default list -}}
+
+{{- /* If validations pass, render the ConfigMap. */}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "kvmfun.fullname" . }}-test-list
+  labels:
+    {{- include "kvmfun.labels" . | nindent 4 }}
+data:
+  test_list.txt: >-
+    {{ $testList | toJson }}
+{{- end -}}

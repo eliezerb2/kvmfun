@@ -4,7 +4,7 @@ import logging
 from src.services.disk_attach import attach_disk
 from src.services.disk_detach import detach_disk
 from src.utils.constants import COMMON_API_RESPONSES
-from src.utils.libvirt_utils import get_connection_dependency, get_next_available_virtio_dev
+from src.utils.libvirt_utils import get_connection_dependency, get_next_available_scsi_dev
 from src.utils.validation_utils import validate_name
 from src.utils.exceptions import DiskNotFound
 from src.services.disk_utils import list_vm_disks
@@ -12,7 +12,7 @@ from src.utils.config import config
 from src.schemas.attach_disk_request import AttachDiskRequest
 from src.schemas.detach_disk_request import DetachDiskRequest
 
-logger = logging.getLogger(__name__)
+logger: logging.Logger = logging.getLogger(__name__)
 router = APIRouter(
     prefix=config.DISK_ROUTER_PREFIX, 
     tags=["disk"],
@@ -76,7 +76,6 @@ async def attach_disk_endpoint(request: AttachDiskRequest, conn: libvirt.virConn
         request: AttachDiskRequest containing:
             - vm_name: Name of the target VM (alphanumeric, hyphens, underscores only)
             - qcow2_path: Full path to the QCOW2 disk file (must end with .qcow2)
-            - target_dev: Device name (optional, format: vd[a-z]+)
     
     Returns:
         dict: Success status and assigned target device
@@ -85,21 +84,22 @@ async def attach_disk_endpoint(request: AttachDiskRequest, conn: libvirt.virConn
         HTTPException: 400 for invalid input, 404 for VM not found, 
                       409 for conflicts, 500 for server errors
     """
-    logger.info(f"Disk attach request - VM: {request.vm_name}, Path: {request.qcow2_path}, Target: {request.target_dev}")
+    logger.info(f"Disk attach request - VM: {request.vm_name}, Path: {request.qcow2_path}")
     
     try:
         dom = conn.lookupByName(request.vm_name)
         logger.info(f"Successfully connected to VM '{request.vm_name}'")
         
-        if not request.target_dev:
-            request.target_dev = get_next_available_virtio_dev(dom)
-            logger.info(f"Auto-assigned target device: {request.target_dev}")
+        # TODO: add an optional target dev parameter to the request
+        # TODO: move the logic for getting next available device to the service layer
+        target_dev: str = get_next_available_scsi_dev(dom)
+        logger.info(f"Auto-assigned target device: {target_dev}")
         
-        success = attach_disk(dom, request.qcow2_path, request.target_dev)
+        success = attach_disk(dom, request.qcow2_path, target_dev)
         
         if success:
-            logger.info(f"Successfully attached disk '{request.qcow2_path}' as '{request.target_dev}' to VM '{request.vm_name}'")
-            return {"status": "success", "target_dev": request.target_dev}
+            logger.info(f"Successfully attached disk '{request.qcow2_path}' as '{target_dev}' to VM '{request.vm_name}'")
+            return {"status": "success", "target_dev": target_dev}
         else:
             logger.error(f"Failed to attach disk '{request.qcow2_path}' to VM '{request.vm_name}'")
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
@@ -150,3 +150,7 @@ async def detach_disk_endpoint(request: DetachDiskRequest, conn: libvirt.virConn
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
     except ValueError as e: # Catches other validation errors
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except RuntimeError as e: # Catches timeout errors
+        logger.error(f"Runtime error during disk detach: {e}")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                          detail=str(e))

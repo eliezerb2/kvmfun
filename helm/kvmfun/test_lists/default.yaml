@@ -1,0 +1,7 @@
+# Test execution order
+tests:
+  - create_volumes.py
+  - create_vm.py
+  - start_vm.py
+  - attach_disk.py
+  - detach_disk.py
