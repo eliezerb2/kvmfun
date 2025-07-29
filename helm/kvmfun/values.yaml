@@ -9,17 +9,10 @@ image:
 
 # Kubernetes service configuration
 service:
-  type: ClusterIP
-  port: 80           # External port
-  # Service annotations for ingress or service mesh
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # service.beta.kubernetes.io/aws-load-balancer-type: nlb
-
-# Ingress configuration (disabled by default)
-ingress:
-  enabled: false
-
+  type: NodePort      # Service type (ClusterIP, NodePort, LoadBalancer)
+  port: 80            # Internal port
+  nodePort: 30800   # External port
+  
 # Service account configuration
 serviceAccount:
   # Specifies whether a service account should be created
