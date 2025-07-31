@@ -19,15 +19,36 @@ Common initContainer for setting up SSH keys.
 {{- define "kvmfun.pod.initcontainer" -}}
 - name: ssh-setup
   image: busybox
-  command: ['sh', '-c',
-    'mkdir -p /root/.ssh &&
-     cp /secrets/id_{{ .Values.appConfig.LIBVIRT_SSH_KEY_TYPE }} /root/.ssh/id_{{ .Values.appConfig.LIBVIRT_SSH_KEY_TYPE }} &&
-     chmod 600 /root/.ssh/* &&
-     echo "Host *" > /root/.ssh/config &&
-     echo "  StrictHostKeyChecking no" >> /root/.ssh/config &&
-     echo "  UserKnownHostsFile /dev/null" >> /root/.ssh/config &&
-     echo "  IdentityFile /root/.ssh/id_{{ .Values.appConfig.LIBVIRT_SSH_KEY_TYPE }}" >> /root/.ssh/config &&
-     chmod 600 /root/.ssh/config']
+  command: ['sh', '-c']
+  # TODO: Consider using ssh-keyscan to add the host key to a known_hosts file instead of StrictHostKeyChecking
+  args:
+    - |
+      set -ex
+      echo "INFO: Starting ssh-setup init container"
+      SSH_PATH="/appuser/.ssh"
+      KEY_FILE="$SSH_PATH/id_{{ .Values.appConfig.LIBVIRT_SSH_KEY_TYPE }}"
+      CONFIG_FILE="$SSH_PATH/config"
+
+      echo "INFO: Creating SSH directory: $SSH_PATH"
+      mkdir -p "$SSH_PATH"
+      chmod 700 "$SSH_PATH"
+
+      echo "INFO: Copying private key from /secrets to $KEY_FILE"
+      cp "/secrets/id_{{ .Values.appConfig.LIBVIRT_SSH_KEY_TYPE }}" "$KEY_FILE"
+      chmod 600 "$KEY_FILE"
+
+      echo "INFO: Creating SSH config file $CONFIG_FILE to disable host key checking."
+      cat << EOF > "$CONFIG_FILE"
+      Host *
+        StrictHostKeyChecking no
+        UserKnownHostsFile /dev/null
+        IdentityFile $KEY_FILE
+      EOF
+      chmod 600 "$CONFIG_FILE"
+
+      echo "INFO: Verifying .ssh directory contents:"
+      ls -la "$SSH_PATH"
+      echo "INFO: ssh-setup init container finished successfully."
   volumeMounts:
     - name: ssh-secret
       mountPath: /secrets
