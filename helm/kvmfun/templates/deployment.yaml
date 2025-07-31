@@ -17,11 +17,16 @@ spec:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
     spec:
       serviceAccountName: {{ include "kvmfun.serviceAccountName" . }}
+      securityContext:
+        fsGroup: 999
       initContainers:
         {{- include "kvmfun.pod.initcontainer" . | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          securityContext:
+            runAsUser: 999
+            runAsGroup: 999
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http

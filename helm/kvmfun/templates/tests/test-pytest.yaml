@@ -10,12 +10,17 @@ metadata:
     "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   serviceAccountName: {{ include "kvmfun.serviceAccountName" . }}
+  securityContext:
+    fsGroup: 999
   initContainers:
     {{- include "kvmfun.pod.initcontainer" . | nindent 4 }}
   containers:
     - name: pytest
       image: "{{ .Values.tests.image.repository }}:{{ .Values.tests.image.tag }}"
       imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
+      securityContext:
+        runAsUser: 999
+        runAsGroup: 999
       command: ["tests/scripts/run-pytest.sh"]
       volumeMounts:
         {{- include "kvmfun.pod.volumeMounts" . | nindent 8 }}
